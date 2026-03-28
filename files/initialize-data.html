@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initialize GymFit Pro Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 100px auto;
+            padding: 20px;
+            background: #f0f0f0;
+            text-align: center;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #FF0844;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+        }
+        button {
+            background: #FF0844;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #C70039;
+        }
+        .success {
+            color: #00FF88;
+            margin-top: 20px;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🏋️ GymFit Pro - Data Initialization</h1>
+        <p>This page will load sample member data into your browser storage.</p>
+        <p>Click the button below to initialize the database with 8 example members.</p>
+        <button onclick="initializeData()">Initialize Sample Data</button>
+        <p class="success" id="success-msg">✅ Data initialized successfully! You can now close this page.</p>
+    </div>
+
+    <script>
+        function initializeData() {
+            const sampleMembers = [
+                {
+                    id: '#GYM001',
+                    fullName: 'Rahul Mehta',
+                    email: 'rahul.m@email.com',
+                    phone: '9876543210',
+                    dob: '1990-05-15',
+                    gender: 'male',
+                    plan: 'Premium Half-Yearly',
+                    trainer: 'Rajesh Kumar - Strength Training',
+                    emergencyContact: 'Priya Mehta',
+                    emergencyPhone: '9876543211',
+                    joinDate: '2025-08-04',
+                    expiryDate: '2026-02-04',
+                    status: 'Active'
+                },
+                {
+                    id: '#GYM002',
+                    fullName: 'Sneha Patil',
+                    email: 'sneha.p@email.com',
+                    phone: '9876543212',
+                    dob: '1992-03-22',
+                    gender: 'female',
+                    plan: 'Standard Quarterly',
+                    trainer: 'Priya Sharma - Yoga & Flexibility',
+                    emergencyContact: 'Vijay Patil',
+                    emergencyPhone: '9876543213',
+                    joinDate: '2025-11-04',
+                    expiryDate: '2026-02-02',
+                    status: 'Active'
+                },
+                {
+                    id: '#GYM003',
+                    fullName: 'Amit Shah',
+                    email: 'amit.s@email.com',
+                    phone: '9876543214',
+                    dob: '1988-07-10',
+                    gender: 'male',
+                    plan: 'Elite Annual',
+                    trainer: 'Vikram Singh - Weight Loss',
+                    emergencyContact: 'Sunita Shah',
+                    emergencyPhone: '9876543215',
+                    joinDate: '2025-06-04',
+                    expiryDate: '2026-06-04',
+                    status: 'Active'
+                },
+                {
+                    id: '#GYM004',
+                    fullName: 'Kavya Nair',
+                    email: 'kavya.n@email.com',
+                    phone: '9876543216',
+                    dob: '1995-12-18',
+                    gender: 'female',
+                    plan: 'Basic Monthly',
+                    trainer: 'Anjali Reddy - Cardio & Endurance',
+                    emergencyContact: 'Arun Nair',
+                    emergencyPhone: '9876543217',
+                    joinDate: '2026-01-04',
+                    expiryDate: '2026-02-04',
+                    status: 'Active'
+                },
+                {
+                    id: '#GYM005',
+                    fullName: 'Arjun Kumar',
+                    email: 'arjun.k@email.com',
+                    phone: '9876543218',
+                    dob: '1991-09-05',
+                    gender: 'male',
+                    plan: 'Premium Half-Yearly',
+                    trainer: 'Rajesh Kumar - Strength Training',
+                    emergencyContact: 'Maya Kumar',
+                    emergencyPhone: '9876543219',
+                    joinDate: '2025-08-04',
+                    expiryDate: '2026-02-04',
+                    status: 'Active'
+                },
+                {
+                    id: '#GYM006',
+                    fullName: 'Pooja Singh',
+                    email: 'pooja.s@email.com',
+                    phone: '9876543220',
+                    dob: '1993-11-30',
+                    gender: 'female',
+                    plan: 'Standard Quarterly',
+                    trainer: 'No Trainer',
+                    emergencyContact: 'Rohit Singh',
+                    emergencyPhone: '9876543221',
+                    joinDate: '2025-11-04',
+                    expiryDate: '2026-02-02',
+                    status: 'Active'
+                },
+                {
+                    id: '#GYM007',
+                    fullName: 'Vikram Desai',
+                    email: 'vikram.d@email.com',
+                    phone: '9876543222',
+                    dob: '1987-04-12',
+                    gender: 'male',
+                    plan: 'Elite Annual',
+                    trainer: 'Vikram Singh - Weight Loss',
+                    emergencyContact: 'Anjali Desai',
+                    emergencyPhone: '9876543223',
+                    joinDate: '2025-02-04',
+                    expiryDate: '2026-02-04',
+                    status: 'Active'
+                },
+                {
+                    id: '#GYM008',
+                    fullName: 'Neha Gupta',
+                    email: 'neha.g@email.com',
+                    phone: '9876543224',
+                    dob: '1994-06-08',
+                    gender: 'female',
+                    plan: 'Basic Monthly',
+                    trainer: 'Priya Sharma - Yoga & Flexibility',
+                    emergencyContact: 'Harsh Gupta',
+                    emergencyPhone: '9876543225',
+                    joinDate: '2026-01-04',
+                    expiryDate: '2026-02-04',
+                    status: 'Active'
+                }
+            ];
+
+            // Save to localStorage
+            localStorage.setItem('members', JSON.stringify(sampleMembers));
+            
+            // Show success message
+            document.getElementById('success-msg').style.display = 'block';
+            document.querySelector('button').disabled = true;
+            document.querySelector('button').style.opacity = '0.5';
+            
+            console.log('✅ Initialized 8 sample members');
+        }
+    </script>
+</body>
+</html>

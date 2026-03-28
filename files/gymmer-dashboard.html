@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymFit Pro - Gymmer Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-red: #ff0844;
+            --secondary-red: #c70039;
+            --dark-bg: #0a0a0a;
+            --card-bg: #161616;
+            --accent-yellow: #ffb800;
+            --accent-cyan: #00f0ff;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-color: #2a2a2a;
+            --success: #00ff88;
+            --danger: #ff5b5b;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 12% 20%, rgba(255, 8, 68, 0.20), transparent 40%),
+                radial-gradient(circle at 88% 80%, rgba(0, 240, 255, 0.13), transparent 45%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .login-shell,
+        .dashboard-shell {
+            position: relative;
+            z-index: 1;
+            width: min(1100px, 94vw);
+            margin: 2rem auto;
+        }
+
+        .panel {
+            background: rgba(22, 22, 22, 0.94);
+            border: 2px solid var(--border-color);
+            border-radius: 18px;
+            padding: 1.5rem;
+        }
+
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+
+        .muted { color: var(--text-secondary); }
+
+        .login-card {
+            max-width: 420px;
+            margin: 8vh auto;
+        }
+
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.7rem;
+            background: linear-gradient(135deg, var(--primary-red), var(--accent-yellow));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 0.9rem;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 0.35rem;
+            color: var(--text-secondary);
+        }
+
+        .field input,
+        .field textarea,
+        .field select {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            background: #111;
+            color: #fff;
+            border-radius: 10px;
+            padding: 0.72rem 0.8rem;
+            font-family: inherit;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-red), var(--secondary-red));
+            color: #fff;
+        }
+
+        .btn-primary:hover { transform: translateY(-1px); }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: #fff;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .user-pill {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            background: #111;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat {
+            background: linear-gradient(140deg, #1a1a1a, #121212);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .stat h4 {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+        }
+
+        .stat p {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent-yellow);
+            font-size: 1.4rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 1rem;
+        }
+
+        .card { margin-bottom: 1rem; }
+
+        .card h3 {
+            color: var(--accent-cyan);
+            margin-bottom: 0.8rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+        }
+
+        .list {
+            display: grid;
+            gap: 0.7rem;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.6rem;
+            padding: 0.7rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: #111;
+            font-size: 0.95rem;
+        }
+
+        .actions {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .mini-form { display: grid; gap: 0.65rem; }
+
+        .status {
+            margin-top: 0.7rem;
+            font-size: 0.92rem;
+            min-height: 1.1rem;
+        }
+
+        .status.success { color: var(--success); }
+        .status.error { color: var(--danger); }
+
+        .hint {
+            margin-top: 0.8rem;
+            border: 1px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 0.65rem;
+            font-size: 0.9rem;
+        }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 980px) {
+            .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .content-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <section id="login-shell" class="login-shell">
+        <div class="panel login-card">
+            <div class="brand">GYMFIT MEMBER LOGIN</div>
+            <h2 class="title">Gymmer Dashboard</h2>
+            <p class="muted">Sign in to see your own profile, workouts, attendance, and payments.</p>
+
+            <form id="login-form" class="form-grid" style="margin-top: 1rem;">
+                <div class="field">
+                    <label for="username">Username or Email</label>
+                    <input id="username" name="username" required placeholder="e.g. rahul_m">
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" required placeholder="Your password">
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <div id="login-status" class="status"></div>
+            </form>
+
+            <div class="hint muted">
+                Demo seed login: <strong>rahul_m</strong> / <strong>password</strong>
+            </div>
+        </div>
+    </section>
+
+    <section id="dashboard-shell" class="dashboard-shell hidden">
+        <div class="topbar panel">
+            <div>
+                <h2 class="title" id="welcome-title">Welcome</h2>
+                <p class="muted" id="member-plan-label">Plan: -</p>
+            </div>
+            <div style="display:flex; gap:0.6rem; align-items:center;">
+                <div class="user-pill" id="user-pill">Member</div>
+                <button id="logout-btn" class="btn btn-outline">Logout</button>
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat"><h4>BMI</h4><p id="stat-bmi">-</p></div>
+            <div class="stat"><h4>Visits This Month</h4><p id="stat-month-visits">0</p></div>
+            <div class="stat"><h4>Total Training Hours</h4><p id="stat-hours">0</p></div>
+            <div class="stat"><h4>Days Remaining</h4><p id="stat-days-left">-</p></div>
+        </div>
+
+        <div class="content-grid">
+            <div>
+                <div class="panel card">
+                    <h3>My Attendance</h3>
+                    <button id="checkin-btn" class="btn btn-primary" style="margin-bottom: 0.8rem;">Check In Now</button>
+                    <div id="checkin-status" class="status"></div>
+                    <div id="attendance-list" class="list muted">No attendance records</div>
+                </div>
+
+                <div class="panel card">
+                    <h3>My Workout Plan</h3>
+                    <div id="workout-list" class="list muted">No workouts assigned</div>
+                </div>
+
+                <div class="panel card">
+                    <h3>My Diet Plan</h3>
+                    <div id="diet-list" class="list muted">No diet assigned</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="panel card">
+                    <h3>Trainer</h3>
+                    <div id="trainer-details" class="list muted">No trainer assigned</div>
+                </div>
+
+                <div class="panel card">
+                    <h3>Recent Payments</h3>
+                    <div id="payment-list" class="list muted">No payments found</div>
+                </div>
+
+                <div class="panel card">
+                    <h3>Actions (Saved To Database)</h3>
+                    <div class="actions">
+                        <button id="renew-btn" class="btn btn-outline">Request Membership Renewal</button>
+                        <div id="renew-status" class="status"></div>
+
+                        <form id="session-form" class="mini-form">
+                            <div class="field">
+                                <label for="session-date">Session Date</label>
+                                <input id="session-date" type="date" required>
+                            </div>
+                            <div class="field">
+                                <label for="session-start">Start Time</label>
+                                <input id="session-start" type="time" required>
+                            </div>
+                            <div class="field">
+                                <label for="session-end">End Time</label>
+                                <input id="session-end" type="time" required>
+                            </div>
+                            <div class="field">
+                                <label for="session-notes">Notes</label>
+                                <textarea id="session-notes" rows="2" placeholder="Optional notes"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Book Session</button>
+                        </form>
+                        <div id="session-status" class="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        let currentMember = null;
+
+        function setStatus(id, message, type) {
+            const el = document.getElementById(id);
+            el.textContent = message || '';
+            el.className = 'status';
+            if (type) el.classList.add(type);
+        }
+
+        async function apiCall(path, options = {}) {
+            const response = await fetch(`${API_BASE}${path}`, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options
+            });
+
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (_) {
+                data = {};
+            }
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Request failed');
+            }
+
+            return data;
+        }
+
+        function formatDate(value) {
+            if (!value) return '-';
+            return new Date(value).toLocaleDateString();
+        }
+
+        function renderOverview(data) {
+            const member = data.member;
+            const attendance = data.attendance || {};
+
+            document.getElementById('welcome-title').textContent = `Welcome, ${member.full_name}`;
+            document.getElementById('member-plan-label').textContent = `Plan: ${member.plan_name || 'N/A'}`;
+            document.getElementById('user-pill').textContent = `${member.username} (#${member.gymmer_id})`;
+
+            document.getElementById('stat-bmi').textContent = member.bmi ? Number(member.bmi).toFixed(1) : '-';
+            document.getElementById('stat-month-visits').textContent = attendance.month_visits || 0;
+            document.getElementById('stat-hours').textContent = Math.floor((attendance.total_minutes || 0) / 60);
+
+            if (member.membership_end) {
+                const days = Math.max(0, Math.ceil((new Date(member.membership_end) - new Date()) / 86400000));
+                document.getElementById('stat-days-left').textContent = days;
+            } else {
+                document.getElementById('stat-days-left').textContent = '-';
+            }
+
+            const trainerContainer = document.getElementById('trainer-details');
+            if (member.trainer_name) {
+                trainerContainer.classList.remove('muted');
+                trainerContainer.innerHTML = [
+                    `<div class="row"><span>Name</span><strong>${member.trainer_name}</strong></div>`,
+                    `<div class="row"><span>Specialization</span><strong>${member.specialization || 'N/A'}</strong></div>`,
+                    `<div class="row"><span>Email</span><strong>${member.trainer_email || 'N/A'}</strong></div>`,
+                    `<div class="row"><span>Phone</span><strong>${member.trainer_phone || 'N/A'}</strong></div>`
+                ].join('');
+            } else {
+                trainerContainer.classList.add('muted');
+                trainerContainer.textContent = 'No trainer assigned';
+            }
+        }
+
+        function parseJsonField(value, fallback = []) {
+            if (!value) return fallback;
+            if (Array.isArray(value)) return value;
+            try {
+                return JSON.parse(value);
+            } catch (_) {
+                return fallback;
+            }
+        }
+
+        async function loadAttendance() {
+            const rows = await apiCall(`/gymmer/${currentMember.gymmer_id}/attendance`);
+            const el = document.getElementById('attendance-list');
+
+            if (!rows.length) {
+                el.classList.add('muted');
+                el.textContent = 'No attendance records';
+                return;
+            }
+
+            el.classList.remove('muted');
+            el.innerHTML = rows.slice(0, 8).map((row) => {
+                const checkIn = new Date(row.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const checkOut = row.check_out_time
+                    ? new Date(row.check_out_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : '-';
+                return `<div class="row"><span>${formatDate(row.date)}</span><strong>${checkIn} - ${checkOut}</strong></div>`;
+            }).join('');
+        }
+
+        async function loadPayments() {
+            const rows = await apiCall(`/gymmer/${currentMember.gymmer_id}/payments`);
+            const el = document.getElementById('payment-list');
+
+            if (!rows.length) {
+                el.classList.add('muted');
+                el.textContent = 'No payments found';
+                return;
+            }
+
+            el.classList.remove('muted');
+            el.innerHTML = rows.slice(0, 6).map((row) => (
+                `<div class="row"><span>${formatDate(row.payment_date)}</span><strong>INR ${Number(row.amount).toFixed(2)}</strong></div>`
+            )).join('');
+        }
+
+        async function loadWorkouts() {
+            const rows = await apiCall(`/gymmer/${currentMember.gymmer_id}/workouts`);
+            const el = document.getElementById('workout-list');
+
+            if (!rows.length) {
+                el.classList.add('muted');
+                el.textContent = 'No workouts assigned';
+                return;
+            }
+
+            el.classList.remove('muted');
+            el.innerHTML = rows.map((row) => {
+                const exercises = parseJsonField(row.exercises, []);
+                const names = exercises.map((e) => e.exercise || e.exercise_name).filter(Boolean).join(', ');
+                return `<div class="row"><span>${row.day_of_week.toUpperCase()}</span><strong>${names || row.plan_name}</strong></div>`;
+            }).join('');
+        }
+
+        async function loadDiet() {
+            const rows = await apiCall(`/gymmer/${currentMember.gymmer_id}/diet`);
+            const el = document.getElementById('diet-list');
+
+            if (!rows.length) {
+                el.classList.add('muted');
+                el.textContent = 'No diet assigned';
+                return;
+            }
+
+            el.classList.remove('muted');
+            el.innerHTML = rows.map((row) => {
+                const meals = parseJsonField(row.meal_items, []);
+                const firstTwo = meals.slice(0, 2).map((m) => m.item || m.item_name).join(', ');
+                return `<div class="row"><span>${row.meal_type.toUpperCase()}</span><strong>${firstTwo || row.plan_name}</strong></div>`;
+            }).join('');
+        }
+
+        async function loadDashboard() {
+            const overview = await apiCall(`/gymmer/${currentMember.gymmer_id}/overview`);
+            renderOverview(overview);
+            await Promise.all([loadAttendance(), loadPayments(), loadWorkouts(), loadDiet()]);
+        }
+
+        function showDashboard() {
+            document.getElementById('login-shell').classList.add('hidden');
+            document.getElementById('dashboard-shell').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('dashboard-shell').classList.add('hidden');
+            document.getElementById('login-shell').classList.remove('hidden');
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            setStatus('login-status', 'Signing in...', '');
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            try {
+                const result = await apiCall('/gymmer/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+
+                currentMember = result.member;
+                localStorage.setItem('gymmerSession', JSON.stringify(result.member));
+                showDashboard();
+                await loadDashboard();
+                setStatus('login-status', '');
+            } catch (error) {
+                setStatus('login-status', error.message, 'error');
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('gymmerSession');
+            currentMember = null;
+            setStatus('login-status', 'Logged out successfully', 'success');
+            showLogin();
+        });
+
+        document.getElementById('checkin-btn').addEventListener('click', async () => {
+            setStatus('checkin-status', 'Saving check-in...', '');
+            try {
+                await apiCall(`/gymmer/${currentMember.gymmer_id}/checkin`, { method: 'POST' });
+                setStatus('checkin-status', 'Checked in and saved to database', 'success');
+                await loadDashboard();
+            } catch (error) {
+                setStatus('checkin-status', error.message, 'error');
+            }
+        });
+
+        document.getElementById('renew-btn').addEventListener('click', async () => {
+            setStatus('renew-status', 'Submitting request...', '');
+            try {
+                await apiCall(`/gymmer/${currentMember.gymmer_id}/renew-request`, { method: 'POST' });
+                setStatus('renew-status', 'Renewal request saved and sent to admin', 'success');
+            } catch (error) {
+                setStatus('renew-status', error.message, 'error');
+            }
+        });
+
+        document.getElementById('session-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            setStatus('session-status', 'Booking session...', '');
+
+            const payload = {
+                session_date: document.getElementById('session-date').value,
+                start_time: document.getElementById('session-start').value,
+                end_time: document.getElementById('session-end').value,
+                notes: document.getElementById('session-notes').value.trim()
+            };
+
+            try {
+                await apiCall(`/gymmer/${currentMember.gymmer_id}/book-session`, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                setStatus('session-status', 'Session booked and saved to database', 'success');
+                event.target.reset();
+            } catch (error) {
+                setStatus('session-status', error.message, 'error');
+            }
+        });
+
+        (async function init() {
+            const saved = localStorage.getItem('gymmerSession');
+            if (!saved) {
+                showLogin();
+                return;
+            }
+
+            try {
+                currentMember = JSON.parse(saved);
+                showDashboard();
+                await loadDashboard();
+            } catch (error) {
+                localStorage.removeItem('gymmerSession');
+                showLogin();
+            }
+        })();
+    </script>
+</body>
+</html>

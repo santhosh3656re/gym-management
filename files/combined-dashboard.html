@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymFit Pro - Admin & Gymmer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-red: #FF0844;
+            --secondary-red: #C70039;
+            --dark-bg: #0A0A0A;
+            --card-bg: #161616;
+            --accent-yellow: #FFB800;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --border-color: #2A2A2A;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .switcher {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        .switcher-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--accent-yellow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .switcher-controls {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .tab-btn {
+            padding: 0.7rem 1.6rem;
+            border-radius: 999px;
+            border: 2px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            color: #fff;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 15px rgba(255, 8, 68, 0.4);
+        }
+
+        .frame-wrap {
+            height: calc(100vh - 74px);
+        }
+
+        .frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+            background: #0A0A0A;
+        }
+
+        .frame.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header class="switcher">
+        <div class="switcher-title">GymFit Pro</div>
+        <div class="switcher-controls" role="tablist" aria-label="Dashboard switcher">
+            <button class="tab-btn active" type="button" role="tab" aria-selected="true" aria-controls="admin-frame" data-target="admin-frame">Admin</button>
+            <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="gymmer-frame" data-target="gymmer-frame">Gymmer</button>
+        </div>
+    </header>
+
+    <main class="frame-wrap">
+        <iframe id="admin-frame" class="frame active" title="Admin Dashboard" src="admin-dashboard.html"></iframe>
+        <iframe id="gymmer-frame" class="frame" title="Gymmer Dashboard" src="gymmer-dashboard.html"></iframe>
+    </main>
+
+    <script>
+        // Database Configuration
+        const DB_CONFIG = {
+            host: 'localhost',
+            user: 'root',
+            password: 'your_password',
+            database: 'gym_management',
+            port: 3306
+        };
+
+        // API Base URL (assuming Node.js/Express backend)
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // Tab Switching Functionality
+        const buttons = document.querySelectorAll('.tab-btn');
+        const frames = document.querySelectorAll('.frame');
+
+        buttons.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                buttons.forEach((b) => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                frames.forEach((frame) => frame.classList.remove('active'));
+
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
+                const targetId = btn.getAttribute('data-target');
+                const frame = document.getElementById(targetId);
+                if (frame) {
+                    frame.classList.add('active');
+                }
+            });
+        });
+
+        // ========================================
+        // MEMBER MANAGEMENT - SQL OPERATIONS
+        // ========================================
+
+        /**
+         * Add New Member - Inserts into gymmer table
+         * INSERT INTO gymmer (username, password_hash, full_name, email, phone, date_of_birth, gender, address, plan_id, join_date, membership_start, membership_end, status)
+         */
+        async function addNewMember(memberData) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/members/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: memberData.username,
+                        password_hash: hashPassword(memberData.password),
+                        full_name: memberData.fullName,
+                        email: memberData.email,
+                        phone: memberData.phone,
+                        date_of_birth: memberData.dob,
+                        gender: memberData.gender,
+                        address: memberData.address,
+                        emergency_contact: memberData.emergencyContact,
+                        emergency_phone: memberData.emergencyPhone,
+                        plan_id: memberData.planId,
+                        trainer_id: memberData.trainerId || null,
+                        join_date: new Date().toISOString().split('T')[0],
+                        membership_start: memberData.membershipStart,
+                        membership_end: memberData.membershipEnd,
+                        status: 'active'
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to add member');
+                const result = await response.json();
+                console.log('Member added successfully:', result);
+                showNotification('Member added successfully!', 'success');
+                loadAllMembers();
+                closeModal('add-member');
+                return result;
+            } catch (error) {
+                console.error('Error adding member:', error);
+                showNotification('Failed to add member: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * Get All Members - SELECT from gymmer table
+         * SELECT * FROM gymmer WHERE status != 'inactive' ORDER BY created_at DESC
+         */
+        async function loadAllMembers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/members/all`);
+                if (!response.ok) throw new Error('Failed to load members');
+                const members = await response.json();
+                displayMembersTable(members);
+                return members;
+            } catch (error) {
+                console.error('Error loading members:', error);
+                showNotification('Failed to load members', 'error');
+            }
+        }
+
+        /**
+         * Get Member by ID - SELECT specific member
+         * SELECT * FROM gymmer WHERE gymmer_id = ?
+         */
+        async function getMemberById(memberId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/members/${memberId}`);
+                if (!response.ok) throw new Error('Member not found');
+                const member = await response.json();
+                return member;
+            } catch (error) {
+                console.error('Error fetching member:', error);
+                return null;
+            }
+        }
+
+        /**
+         * Update Member - UPDATE gymmer table
+         * UPDATE gymmer SET full_name=?, email=?, phone=?, ... WHERE gymmer_id=?
+         */
+        async function updateMember(memberId, memberData) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/members/${memberId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(memberData)
+                });
+
+                if (!response.ok) throw new Error('Failed to update member');
+                const result = await response.json();
+                console.log('Member updated:', result);
+                showNotification('Member updated successfully!', 'success');
+                loadAllMembers();
+                return result;
+            } catch (error) {
+                console.error('Error updating member:', error);
+                showNotification('Failed to update member', 'error');
+            }
+        }
+
+        /**
+         * Delete Member - UPDATE status to inactive (soft delete)
+         * UPDATE gymmer SET status='inactive' WHERE gymmer_id=?
+         */
+        async function deleteMember(memberId) {
+            if (!confirm('Are you sure you want to deactivate this member?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/members/${memberId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to delete member');
+                showNotification('Member deactivated successfully!', 'success');
+                loadAllMembers();
+            } catch (error) {
+                console.error('Error deleting member:', error);
+                showNotification('Failed to deactivate member', 'error');
+            }
+        }
+
+        /**
+         * Search Members - SELECT with WHERE clause
+         * SELECT * FROM gymmer WHERE full_name LIKE ? OR email LIKE ? OR gymmer_id LIKE ?
+         */
+        async function searchMembers(query) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/members/search?q=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error('Search failed');
+                const members = await response.json();
+                displayMembersTable(members);
+                return members;
+            } catch (error) {
+                console.error('Error searching members:', error);
+                showNotification('Search failed', 'error');
+            }
+        }
+
+        /**
+         * Get Member Stats - Aggregate queries
+         * SELECT COUNT(*) as total_members FROM gymmer WHERE status='active'
+         */
+        async function getMemberStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/members/stats`);
+                if (!response.ok) throw new Error('Failed to load stats');
+                const stats = await response.json();
+                return stats;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                return { total: 0, active: 0, expired: 0, suspended: 0 };
+            }
+        }
+
+        // ========================================
+        // UTILITY FUNCTIONS
+        // ========================================
+
+        function hashPassword(password) {
+            // In production, this should be done server-side
+            // This is just a placeholder
+            return btoa(password);
+        }
+
+        function displayMembersTable(members) {
+            // Update member table display
+            const tbody = document.querySelector('.data-table tbody');
+            if (!tbody) return;
+
+            tbody.innerHTML = members.map(member => `
+                <tr>
+                    <td>${member.gymmer_id}</td>
+                    <td>${member.full_name}</td>
+                    <td>${member.email}</td>
+                    <td>${member.phone}</td>
+                    <td><span class="status-badge ${member.status}">${member.status}</span></td>
+                    <td>${new Date(member.membership_end).toLocaleDateString()}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn" title="Edit" onclick="editMember(${member.gymmer_id})">✏️</button>
+                            <button class="action-btn" title="Delete" onclick="deleteMember(${member.gymmer_id})">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showNotification(message, type = 'info') {
+            // Display notification to user
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#00FF88' : type === 'error' ? '#FF0844' : '#FFB800'};
+                color: ${type === 'success' ? '#000' : '#fff'};
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId + '-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId + '-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function editMember(memberId) {
+            // Load member data and open edit modal
+            getMemberById(memberId).then(member => {
+                // Populate form with member data
+                console.log('Edit member:', member);
+                openModal('add-member');
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllMembers();
+            getMemberStats();
+        });
+    </script>
+</body>
+</html>

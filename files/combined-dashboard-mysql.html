@@ -1,0 +1,3032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymFit Pro - Complete Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-red: #FF0844;
+            --secondary-red: #C70039;
+            --dark-bg: #0A0A0A;
+            --card-bg: #161616;
+            --accent-yellow: #FFB800;
+            --accent-cyan: #00F0FF;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --border-color: #2A2A2A;
+            --success: #00FF88;
+            --warning: #FFB800;
+            --danger: #FF0844;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 8, 68, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 184, 0, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--border-color);
+            padding: 1rem 2rem;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--accent-yellow) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .view-switcher {
+            display: flex;
+            gap: 0.75rem;
+            background: var(--card-bg);
+            padding: 0.5rem;
+            border-radius: 50px;
+            border: 2px solid var(--border-color);
+        }
+
+        .view-btn {
+            padding: 0.7rem 1.8rem;
+            border-radius: 999px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+        }
+
+        .view-btn.active {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--secondary-red) 100%);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255, 8, 68, 0.5);
+        }
+
+        .db-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--card-bg);
+            border-radius: 50px;
+            border: 2px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .db-indicator.connected {
+            border-color: var(--success);
+        }
+
+        .db-indicator.connected::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .session-pill {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            border: 2px solid var(--border-color);
+            background: var(--card-bg);
+            font-size: 0.9rem;
+        }
+
+        .session-pill.active {
+            display: flex;
+        }
+
+        .login-help {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 74px;
+            width: 280px;
+            height: calc(100vh - 74px);
+            background: linear-gradient(180deg, #161616 0%, #0A0A0A 100%);
+            border-right: 2px solid var(--border-color);
+            padding: 2rem 0;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-section {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+
+        .sidebar-section h3 {
+            color: var(--accent-yellow);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            padding: 0 0.5rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 8, 68, 0.1);
+            color: var(--primary-red);
+            border-left-color: var(--primary-red);
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: calc(100vh - 74px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .page-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .page-header .date {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #1a1a1a 100%);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-insight-trigger {
+            cursor: pointer;
+        }
+
+        .dashboard-insight-trigger.active-insight {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 24px rgba(0, 240, 255, 0.25);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 8, 68, 0.1) 0%, transparent 70%);
+            transition: all 0.5s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary-red);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 8, 68, 0.3);
+        }
+
+        .stat-card:hover::before {
+            top: -25%;
+            right: -25%;
+        }
+
+        .stat-card-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-red);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            opacity: 0.5;
+        }
+
+        /* Card */
+        .card {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #1a1a1a 100%);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent-yellow);
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: rgba(255, 8, 68, 0.1);
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--accent-yellow);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background: rgba(255, 8, 68, 0.05);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(255, 184, 0, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(255, 8, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .badge-info {
+            background: rgba(0, 240, 255, 0.2);
+            color: var(--accent-cyan);
+        }
+
+        /* Loading & Error */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .error {
+            background: rgba(255, 8, 68, 0.2);
+            color: var(--danger);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--danger);
+        }
+
+        /* Welcome Section (Gymmer View) */
+        .welcome-section {
+            background: linear-gradient(135deg, rgba(255, 8, 68, 0.2) 0%, rgba(0, 240, 255, 0.1) 100%);
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '💪';
+            position: absolute;
+            top: 50%;
+            right: 2rem;
+            font-size: 10rem;
+            opacity: 0.1;
+            transform: translateY(-50%);
+        }
+
+        .welcome-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quick-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quick-stat {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .quick-stat-icon {
+            font-size: 2rem;
+        }
+
+        .quick-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-red);
+        }
+
+        .quick-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .gymmer-attendance-action {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding: 1.2rem 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .gymmer-attendance-status {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--secondary-red) 100%);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 8, 68, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-red);
+            color: var(--primary-red);
+        }
+
+        .btn-outline:hover {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--secondary-red) 100%);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #b00020 0%, #ff1744 100%);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 5px 20px rgba(255, 23, 68, 0.4);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .members-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        .members-search {
+            width: 100%;
+            max-width: 360px;
+            padding: 0.7rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+        }
+
+        .members-search:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 10px rgba(255, 8, 68, 0.3);
+        }
+
+        .startup-mode-content {
+            max-width: 520px;
+            text-align: center;
+        }
+
+        .startup-mode-desc {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .startup-mode-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .startup-login-form {
+            text-align: left;
+        }
+
+        .blur-input {
+            background: rgba(255, 255, 255, 0.06) !important;
+            backdrop-filter: blur(6px);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #1a1a1a 100%);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .modal-header h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--accent-yellow);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--primary-red);
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 10px rgba(255, 8, 68, 0.3);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: flex-end;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .notification.success {
+            background: var(--success);
+            color: #000;
+        }
+
+        .notification.error {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .notification.info {
+            background: var(--accent-cyan);
+            color: #000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            .main-content {
+                margin-left: 200px;
+                padding: 1rem;
+            }
+            .page-header h2 {
+                font-size: 1.8rem;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            table {
+                font-size: 0.9rem;
+            }
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <div class="nav-container">
+            <div class="logo">GYMFIT PRO</div>
+            <div class="view-switcher">
+                <button id="admin-view-btn" class="view-btn active" onclick="switchView('admin', event)">👨‍💼 Admin</button>
+                <button id="gymmer-view-btn" class="view-btn" onclick="switchView('gymmer', event)">💪 Gymmer</button>
+            </div>
+            <div class="session-pill" id="gymmer-session-pill">
+                <span id="gymmer-session-name">Not logged in</span>
+                <button class="btn btn-sm btn-outline" onclick="logoutGymmer()">Logout</button>
+            </div>
+            <div class="db-indicator" id="db-status">
+                <span id="db-status-text">Connecting...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Sidebar -->
+    <div class="sidebar" id="admin-sidebar">
+        <div class="sidebar-section">
+            <h3>Admin Panel</h3>
+            <div class="nav-menu">
+                <div class="nav-item active" onclick="loadSection('admin-dashboard')">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('admin-members')">
+                    <span class="nav-icon">👥</span>
+                    <span>Members</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('admin-trainers')">
+                    <span class="nav-icon">🏃</span>
+                    <span>Trainers</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('admin-plans')">
+                    <span class="nav-icon">📋</span>
+                    <span>Plans</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('admin-payments')">
+                    <span class="nav-icon">💳</span>
+                    <span>Payments</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('admin-attendance')">
+                    <span class="nav-icon">✓</span>
+                    <span>Attendance</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('admin-access-logs')">
+                    <span class="nav-icon">🕒</span>
+                    <span>Gymmer Access Logs</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gymmer Sidebar -->
+    <div class="sidebar" id="gymmer-sidebar" style="display: none;">
+        <div class="sidebar-section">
+            <h3>My Dashboard</h3>
+            <div class="nav-menu">
+                <div class="nav-item active" onclick="loadSection('gymmer-home')">
+                    <span class="nav-icon">🏠</span>
+                    <span>Home</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('gymmer-profile')">
+                    <span class="nav-icon">👤</span>
+                    <span>My Profile</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('gymmer-attendance')">
+                    <span class="nav-icon">📅</span>
+                    <span>My Attendance</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('gymmer-payments')">
+                    <span class="nav-icon">💰</span>
+                    <span>My Payments</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('gymmer-trainer')">
+                    <span class="nav-icon">🏋️</span>
+                    <span>My Trainer</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('gymmer-workouts')">
+                    <span class="nav-icon">💪</span>
+                    <span>Workouts</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- ADMIN SECTIONS -->
+        
+        <!-- Admin Dashboard -->
+        <div id="admin-dashboard-section" class="content-section active">
+            <div class="page-header">
+                <h2>Admin Dashboard</h2>
+                <div class="date" id="current-date"></div>
+            </div>
+
+            <div class="grid">
+                <div class="stat-card dashboard-insight-trigger" data-insight="members" onclick="loadDashboardInsight('members')">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Total Members</div>
+                        <div class="stat-value" id="stat-members">--</div>
+                        <div class="stat-icon">👥</div>
+                    </div>
+                </div>
+                <div class="stat-card dashboard-insight-trigger" data-insight="revenue" onclick="loadDashboardInsight('revenue')">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Monthly Revenue</div>
+                        <div class="stat-value" id="stat-revenue">₹--</div>
+                        <div class="stat-icon">💰</div>
+                    </div>
+                </div>
+                <div class="stat-card dashboard-insight-trigger" data-insight="attendance" onclick="loadDashboardInsight('attendance')">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Today's Attendance</div>
+                        <div class="stat-value" id="stat-attendance">--</div>
+                        <div class="stat-icon">📋</div>
+                    </div>
+                </div>
+                <div class="stat-card dashboard-insight-trigger" data-insight="trainers" onclick="loadDashboardInsight('trainers')">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Active Trainers</div>
+                        <div class="stat-value" id="stat-trainers">--</div>
+                        <div class="stat-icon">🏃</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="dashboard-insight-card">
+                <h3 id="dashboard-insight-title">Dashboard Insight</h3>
+                <div id="dashboard-insight-content">
+                    <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">
+                        Tap a stat card above to view detailed list.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>⚠️ Expiring Memberships (Next 7 Days)</h3>
+                <div id="expiring-memberships-content">
+                    <div class="loading">Loading expiring memberships...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>💳 Recent Payments</h3>
+                <div id="recent-payments-content">
+                    <div class="loading">Loading payments...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>✓ Recent Attendance</h3>
+                <div id="recent-attendance-content">
+                    <div class="loading">Loading attendance...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Members -->
+        <div id="admin-members-section" class="content-section">
+            <div class="page-header">
+                <h2>All Members</h2>
+                <button class="btn" onclick="openModal('add-member')">+ Add Member</button>
+            </div>
+            <div class="card">
+                <div class="members-toolbar">
+                    <input
+                        id="members-search"
+                        class="members-search"
+                        type="search"
+                        placeholder="Search by name, email, phone, username, plan"
+                        oninput="handleMembersSearch(event)"
+                    >
+                </div>
+                <div id="members-content">
+                    <div class="loading">Loading members...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Trainers -->
+        <div id="admin-trainers-section" class="content-section">
+            <div class="page-header">
+                <h2>All Trainers</h2>
+                <button class="btn" onclick="openModal('add-trainer')">+ Add Trainer</button>
+            </div>
+            <div class="card">
+                <div id="trainers-content">
+                    <div class="loading">Loading trainers...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Plans -->
+        <div id="admin-plans-section" class="content-section">
+            <div class="page-header">
+                <h2>Membership Plans</h2>
+                <button class="btn" onclick="openModal('add-plan')">+ Add Plan</button>
+            </div>
+            <div class="card">
+                <div id="plans-content">
+                    <div class="loading">Loading plans...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Payments -->
+        <div id="admin-payments-section" class="content-section">
+            <div class="page-header">
+                <h2>Payment History</h2>
+                <button class="btn" onclick="openModal('add-payment')">+ Add Payment</button>
+            </div>
+            <div class="card">
+                <div id="payments-content">
+                    <div class="loading">Loading payments...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Attendance -->
+        <div id="admin-attendance-section" class="content-section">
+            <div class="page-header">
+                <h2>Attendance Records</h2>
+                <button class="btn" onclick="openModal('add-attendance')">+ Record Attendance</button>
+            </div>
+            <div class="card">
+                <div id="attendance-content">
+                    <div class="loading">Loading attendance...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Gymmer Access Logs -->
+        <div id="admin-access-logs-section" class="content-section">
+            <div class="page-header">
+                <h2>Gymmer Access Logs</h2>
+            </div>
+            <div class="card">
+                <div id="access-logs-content">
+                    <div class="loading">Loading access logs...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GYMMER SECTIONS -->
+        
+        <!-- Gymmer Home -->
+        <div id="gymmer-home-section" class="content-section">
+            <div class="welcome-section">
+                <div class="welcome-title">Welcome Back, Champion! 💪</div>
+                <div class="welcome-subtitle">Ready to crush your fitness goals today?</div>
+                <div class="quick-stats">
+                    <div class="quick-stat">
+                        <div class="quick-stat-icon">🔥</div>
+                        <div>
+                            <div class="quick-stat-value" id="gymmer-streak">0</div>
+                            <div class="quick-stat-label">Day Streak</div>
+                        </div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-icon">📅</div>
+                        <div>
+                            <div class="quick-stat-value" id="gymmer-attendance">0</div>
+                            <div class="quick-stat-label">This Month</div>
+                        </div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-icon">⏱️</div>
+                        <div>
+                            <div class="quick-stat-value" id="gymmer-hours">0</div>
+                            <div class="quick-stat-label">Total Hours</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="gymmer-attendance-action">
+                <div>
+                    <h3 style="margin-bottom: 0.4rem; color: var(--accent-yellow);">Today's Check-In</h3>
+                    <p id="gymmer-attendance-status" class="gymmer-attendance-status">Check in to record today's attendance.</p>
+                </div>
+                <button id="gymmer-checkin-btn" class="btn" onclick="gymmerCheckIn()">Check In</button>
+            </div>
+
+            <div class="grid">
+                <div class="stat-card">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Membership Status</div>
+                        <div class="stat-value" id="gymmer-status" style="font-size: 1.8rem;">Active</div>
+                        <div class="stat-icon">✓</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Days Remaining</div>
+                        <div class="stat-value" id="gymmer-days-left">--</div>
+                        <div class="stat-icon">📆</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-content">
+                        <div class="stat-label">Current Plan</div>
+                        <div class="stat-value" id="gymmer-plan" style="font-size: 1.5rem;">Premium</div>
+                        <div class="stat-icon">🎯</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-content">
+                        <div class="stat-label">My Trainer</div>
+                        <div class="stat-value" id="gymmer-trainer-name" style="font-size: 1.3rem;">John Doe</div>
+                        <div class="stat-icon">🏋️</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🎯 My Recent Activities</h3>
+                <div id="gymmer-recent-activities">
+                    <div class="loading">Loading activities...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gymmer Profile -->
+        <div id="gymmer-profile-section" class="content-section">
+            <div class="page-header">
+                <h2>My Profile</h2>
+                <button class="btn-outline btn" onclick="alert('Edit Profile - Coming soon!')">Edit Profile</button>
+            </div>
+            <div class="card">
+                <h3>Personal Information</h3>
+                <div id="gymmer-profile-content">
+                    <div class="loading">Loading profile...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gymmer Attendance -->
+        <div id="gymmer-attendance-section" class="content-section">
+            <div class="page-header">
+                <h2>My Attendance History</h2>
+            </div>
+            <div class="card">
+                <div id="gymmer-my-attendance-content">
+                    <div class="loading">Loading your attendance...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gymmer Payments -->
+        <div id="gymmer-payments-section" class="content-section">
+            <div class="page-header">
+                <h2>My Payment History</h2>
+            </div>
+            <div class="card">
+                <div id="gymmer-my-payments-content">
+                    <div class="loading">Loading your payments...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gymmer Trainer -->
+        <div id="gymmer-trainer-section" class="content-section">
+            <div class="page-header">
+                <h2>My Trainer</h2>
+            </div>
+            <div class="card">
+                <div id="gymmer-trainer-info">
+                    <div class="loading">Loading trainer information...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gymmer Workouts -->
+        <div id="gymmer-workouts-section" class="content-section">
+            <div class="page-header">
+                <h2>My Workout Plans</h2>
+                <button class="btn" onclick="alert('Add Workout - Coming soon!')">+ Log Workout</button>
+            </div>
+            <div class="card">
+                <h3>Workout Schedule</h3>
+                <p style="color: var(--text-secondary); padding: 2rem; text-align: center;">
+                    Your personalized workout plans will appear here. Contact your trainer to get started!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Startup Profile Selector -->
+    <div id="startup-mode-modal" class="modal" style="display: flex;">
+        <div class="modal-content startup-mode-content">
+            <div class="modal-header">
+                <h3>Login</h3>
+            </div>
+            <p class="startup-mode-desc">
+                Choose profile and enter username/password.
+            </p>
+            <form class="startup-login-form" onsubmit="handleStartupLogin(event)">
+                <div class="form-group">
+                    <label>Profile</label>
+                    <select id="startup-role" class="blur-input" required>
+                        <option value="admin">Admin</option>
+                        <option value="gymmer">Gymmer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input id="startup-username" class="blur-input" type="text" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input id="startup-password" class="blur-input" type="password" autocomplete="current-password" required>
+                </div>
+                <div class="startup-mode-actions">
+                    <button class="btn" type="submit">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add Member Modal -->
+    <div id="add-member-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="add-member-title">Add New Member</h3>
+                <button class="modal-close" onclick="closeModal('add-member')">&times;</button>
+            </div>
+            <form id="add-member-form" data-mode="add" onsubmit="handleAddMember(event)">
+                <input type="hidden" name="gymmer_id">
+                <div class="form-group">
+                    <label>Username *</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" name="full_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone *</label>
+                    <input type="tel" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth *</label>
+                    <input type="date" name="date_of_birth" required>
+                </div>
+                <div class="form-group">
+                    <label>Gender *</label>
+                    <select name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Membership Plan *</label>
+                    <select name="plan_id" id="member-plan-select" required>
+                        <option value="">Select Plan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Trainer (Optional)</label>
+                    <select name="trainer_id" id="member-trainer-select">
+                        <option value="">No Trainer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea name="address"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('add-member')">Cancel</button>
+                    <button type="submit" class="btn" id="add-member-submit">Add Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Trainer Modal -->
+    <div id="add-trainer-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="add-trainer-title">Add New Trainer</h3>
+                <button class="modal-close" onclick="closeModal('add-trainer')">&times;</button>
+            </div>
+            <form id="add-trainer-form" data-mode="add" onsubmit="handleAddTrainer(event)">
+                <input type="hidden" name="trainer_id">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" name="full_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone *</label>
+                    <input type="tel" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Specialization</label>
+                    <input type="text" name="specialization" placeholder="e.g., Strength Training, Yoga">
+                </div>
+                <div class="form-group">
+                    <label>Certification</label>
+                    <input type="text" name="certification" placeholder="e.g., ACE, NASM">
+                </div>
+                <div class="form-group">
+                    <label>Experience (Years)</label>
+                    <input type="number" name="experience_years" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Hourly Rate (₹)</label>
+                    <input type="number" name="hourly_rate" min="0" step="100" value="1000">
+                </div>
+                <div class="form-group">
+                    <label>Bio</label>
+                    <textarea name="bio" placeholder="Brief description..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('add-trainer')">Cancel</button>
+                    <button type="submit" class="btn" id="add-trainer-submit">Add Trainer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Plan Modal -->
+    <div id="add-plan-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="add-plan-title">Add Membership Plan</h3>
+                <button class="modal-close" onclick="closeModal('add-plan')">&times;</button>
+            </div>
+            <form id="add-plan-form" data-mode="add" onsubmit="handleAddPlan(event)">
+                <input type="hidden" name="plan_id">
+                <div class="form-group">
+                    <label>Plan Name *</label>
+                    <input type="text" name="plan_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Duration (Months) *</label>
+                    <input type="number" name="duration_months" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (₹) *</label>
+                    <input type="number" name="price" min="0" step="100" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Max Trainer Sessions</label>
+                    <input type="number" name="max_trainer_sessions" min="0" value="0">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('add-plan')">Cancel</button>
+                    <button type="submit" class="btn" id="add-plan-submit">Add Plan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Payment Modal -->
+    <div id="add-payment-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="add-payment-title">Record Payment</h3>
+                <button class="modal-close" onclick="closeModal('add-payment')">&times;</button>
+            </div>
+            <form id="add-payment-form" data-mode="add" onsubmit="handleAddPayment(event)">
+                <input type="hidden" name="payment_id">
+                <div class="form-group">
+                    <label>Member *</label>
+                    <select name="gymmer_id" id="payment-member-select" required>
+                        <option value="">Select Member</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Plan *</label>
+                    <select name="plan_id" id="payment-plan-select" required>
+                        <option value="">Select Plan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount (₹) *</label>
+                    <input type="number" name="amount" min="0" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Payment Method *</label>
+                    <select name="payment_method" required>
+                        <option value="">Select Method</option>
+                        <option value="cash">Cash</option>
+                        <option value="upi">UPI</option>
+                        <option value="card">Card</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Payment Date *</label>
+                    <input type="date" name="payment_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select name="payment_status" required>
+                        <option value="completed">Completed</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('add-payment')">Cancel</button>
+                    <button type="submit" class="btn" id="add-payment-submit">Record Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Attendance Modal -->
+    <div id="add-attendance-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="add-attendance-title">Record Attendance</h3>
+                <button class="modal-close" onclick="closeModal('add-attendance')">&times;</button>
+            </div>
+            <form id="add-attendance-form" data-mode="add" onsubmit="handleAddAttendance(event)">
+                <input type="hidden" name="attendance_id">
+                <div class="form-group">
+                    <label>Member *</label>
+                    <select name="gymmer_id" id="attendance-member-select" required>
+                        <option value="">Select Member</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label>Check-In Time *</label>
+                    <input type="time" name="check_in_time" required>
+                </div>
+                <div class="form-group">
+                    <label>Check-Out Time</label>
+                    <input type="time" name="check_out_time">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('add-attendance')">Cancel</button>
+                    <button type="submit" class="btn" id="add-attendance-submit">Record Attendance</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://localhost:3001/api';
+        
+        // Application state
+        let currentView = 'admin';
+        let appState = {
+            stats: {},
+            members: [],
+            trainers: [],
+            plans: [],
+            payments: [],
+            attendance: [],
+            accessLogs: [],
+            currentGymmer: null
+        };
+
+        let membersSearchTerm = '';
+
+        function openStartupSelector() {
+            const startupModal = document.getElementById('startup-mode-modal');
+            if (startupModal) {
+                startupModal.style.display = 'flex';
+            }
+        }
+
+        async function handleStartupLogin(event) {
+            event.preventDefault();
+
+            const startupModal = document.getElementById('startup-mode-modal');
+            const role = document.getElementById('startup-role')?.value || 'admin';
+            const username = (document.getElementById('startup-username')?.value || '').trim();
+            const password = document.getElementById('startup-password')?.value || '';
+
+            if (!username || !password) {
+                showNotification('Username and password are required', 'error');
+                return;
+            }
+
+            if (role === 'admin') {
+                // Demo-only admin login check for this static dashboard.
+                if (username === 'admin' && password === 'admin123') {
+                    if (startupModal) startupModal.style.display = 'none';
+                    await switchView('admin');
+                    showNotification('Admin login successful', 'success');
+                } else {
+                    showNotification('Invalid admin username or password', 'error');
+                }
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/gymmer/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result?.member) {
+                    throw new Error(result?.error || 'Invalid gymmer credentials');
+                }
+
+                appState.currentGymmer = result.member;
+                updateGymmerSessionUI();
+                if (startupModal) startupModal.style.display = 'none';
+                await switchView('gymmer');
+                showNotification('Gymmer login successful', 'success');
+            } catch (error) {
+                showNotification(error.message || 'Gymmer login failed', 'error');
+            }
+        }
+
+        function openGymmerLoginPrompt() {
+            const startupModal = document.getElementById('startup-mode-modal');
+            const roleSelect = document.getElementById('startup-role');
+            const usernameInput = document.getElementById('startup-username');
+            const passwordInput = document.getElementById('startup-password');
+
+            if (roleSelect) {
+                roleSelect.value = 'gymmer';
+            }
+
+            if (usernameInput) usernameInput.value = '';
+            if (passwordInput) passwordInput.value = '';
+
+            if (startupModal) {
+                startupModal.style.display = 'flex';
+            }
+
+            showNotification('Login as Gymmer (password for all users: 123)', 'info');
+        }
+
+        // Update current date
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Check database connection
+        async function checkDatabaseConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    setDatabaseStatus(true);
+                    return true;
+                }
+            } catch (error) {
+                setDatabaseStatus(false);
+                return false;
+            }
+        }
+
+        // Set database status indicator
+        function setDatabaseStatus(connected) {
+            const statusEl = document.getElementById('db-status');
+            const textEl = document.getElementById('db-status-text');
+            
+            if (connected) {
+                statusEl.classList.add('connected');
+                textEl.textContent = 'Database Connected';
+            } else {
+                statusEl.classList.remove('connected');
+                textEl.textContent = 'Database Disconnected';
+            }
+        }
+
+        // API call helper
+        async function fetchData(endpoint) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching ${endpoint}:`, error);
+                return null;
+            }
+        }
+
+        function getCurrentGymmerId() {
+            return appState.currentGymmer && appState.currentGymmer.gymmer_id
+                ? appState.currentGymmer.gymmer_id
+                : null;
+        }
+
+        function updateGymmerSessionUI() {
+            const pill = document.getElementById('gymmer-session-pill');
+            const nameEl = document.getElementById('gymmer-session-name');
+
+            if (appState.currentGymmer) {
+                pill.classList.add('active');
+                nameEl.textContent = `Logged in: ${appState.currentGymmer.full_name}`;
+            } else {
+                pill.classList.remove('active');
+                nameEl.textContent = 'Not logged in';
+            }
+        }
+
+        async function ensureGymmerContext() {
+            if (getCurrentGymmerId()) return true;
+            openGymmerLoginPrompt();
+            return false;
+        }
+
+        function logoutGymmer() {
+            appState.currentGymmer = null;
+            updateGymmerSessionUI();
+            showNotification('Gymmer logged out', 'info');
+            switchView('admin');
+        }
+
+        // Switch between Admin and Gymmer views
+        async function switchView(view, triggerEvent) {
+            currentView = view;
+            
+            const adminSidebar = document.getElementById('admin-sidebar');
+            const gymmerSidebar = document.getElementById('gymmer-sidebar');
+            const viewBtns = document.querySelectorAll('.view-btn');
+            
+            viewBtns.forEach(btn => btn.classList.remove('active'));
+            if (triggerEvent && triggerEvent.target) {
+                triggerEvent.target.classList.add('active');
+            } else {
+                const btn = view === 'admin'
+                    ? document.getElementById('admin-view-btn')
+                    : document.getElementById('gymmer-view-btn');
+                if (btn) btn.classList.add('active');
+            }
+            
+            if (view === 'admin') {
+                adminSidebar.style.display = 'block';
+                gymmerSidebar.style.display = 'none';
+                loadSection('admin-dashboard');
+            } else {
+                const hasGymmer = await ensureGymmerContext();
+                if (hasGymmer) {
+                    adminSidebar.style.display = 'none';
+                    gymmerSidebar.style.display = 'block';
+                    loadSection('gymmer-home');
+                } else {
+                    currentView = 'admin';
+                    adminSidebar.style.display = 'block';
+                    gymmerSidebar.style.display = 'none';
+                    const adminBtn = document.getElementById('admin-view-btn');
+                    if (adminBtn) {
+                        viewBtns.forEach(btn => btn.classList.remove('active'));
+                        adminBtn.classList.add('active');
+                    }
+                }
+            }
+        }
+
+        // Load section
+        function loadSection(section) {
+            if (section.startsWith('gymmer-') && !getCurrentGymmerId()) {
+                showNotification('Select an available member first', 'info');
+                return;
+            }
+
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+
+            // Reset nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const navEvent = typeof window !== 'undefined' ? window.event : null;
+            if (navEvent && navEvent.target && navEvent.target.closest('.nav-item')) {
+                navEvent.target.closest('.nav-item').classList.add('active');
+            }
+
+            // Show selected section and load data
+            const sectionElement = document.getElementById(section + '-section');
+            if (sectionElement) {
+                sectionElement.classList.add('active');
+            }
+
+            // Load section data
+            if (section === 'admin-dashboard') {
+                loadAdminDashboard();
+            } else if (section === 'admin-members') {
+                loadMembers();
+            } else if (section === 'admin-trainers') {
+                loadTrainers();
+            } else if (section === 'admin-plans') {
+                loadPlans();
+            } else if (section === 'admin-payments') {
+                loadPayments();
+            } else if (section === 'admin-attendance') {
+                loadAttendance();
+            } else if (section === 'admin-access-logs') {
+                loadAccessLogs();
+            } else if (section === 'gymmer-home') {
+                loadGymmerHome();
+            } else if (section === 'gymmer-profile') {
+                loadGymmerProfile();
+            } else if (section === 'gymmer-attendance') {
+                loadGymmerAttendance();
+            } else if (section === 'gymmer-payments') {
+                loadGymmerPayments();
+            } else if (section === 'gymmer-trainer') {
+                loadGymmerTrainer();
+            }
+        }
+
+        // ADMIN FUNCTIONS
+
+        async function loadAdminDashboard() {
+            await loadDashboardStats();
+            await loadExpiringMemberships();
+            await loadRecentData();
+            await loadDashboardInsight('attendance');
+        }
+
+        function setActiveInsightCard(type) {
+            document.querySelectorAll('.dashboard-insight-trigger').forEach(card => {
+                card.classList.remove('active-insight');
+            });
+
+            const active = document.querySelector(`.dashboard-insight-trigger[data-insight="${type}"]`);
+            if (active) active.classList.add('active-insight');
+        }
+
+        async function loadDashboardInsight(type) {
+            const titleEl = document.getElementById('dashboard-insight-title');
+            const contentEl = document.getElementById('dashboard-insight-content');
+            if (!titleEl || !contentEl) return;
+
+            setActiveInsightCard(type);
+            contentEl.innerHTML = '<div class="loading">Loading details...</div>';
+
+            if (type === 'attendance') {
+                titleEl.textContent = "Today's Attendance - Present Members";
+                const rows = await fetchData('/attendance') || [];
+                const today = new Date().toISOString().split('T')[0];
+                const presentRows = rows.filter(record => {
+                    if (!record.date) return false;
+                    return new Date(record.date).toISOString().split('T')[0] === today;
+                });
+
+                if (presentRows.length === 0) {
+                    contentEl.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No members marked present today</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr><th>Member</th><th>Check In</th><th>Check Out</th><th>Duration</th></tr></thead><tbody>';
+                presentRows.forEach(record => {
+                    html += `<tr>
+                        <td>${record.full_name}</td>
+                        <td>${new Date(record.check_in_time).toLocaleTimeString()}</td>
+                        <td>${record.check_out_time ? new Date(record.check_out_time).toLocaleTimeString() : 'Active'}</td>
+                        <td>${record.duration_minutes ? record.duration_minutes + ' mins' : 'In Progress'}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                contentEl.innerHTML = html;
+                return;
+            }
+
+            if (type === 'members') {
+                titleEl.textContent = 'Total Members - Full List';
+                const members = await fetchData('/members') || [];
+
+                if (members.length === 0) {
+                    contentEl.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No members found</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Plan</th><th>Status</th></tr></thead><tbody>';
+                members.forEach(member => {
+                    html += `<tr>
+                        <td>${member.gymmer_id}</td>
+                        <td>${member.full_name}</td>
+                        <td>${member.email}</td>
+                        <td>${member.plan_name || 'N/A'}</td>
+                        <td>${member.status}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                contentEl.innerHTML = html;
+                return;
+            }
+
+            if (type === 'revenue') {
+                const payments = await fetchData('/payments') || [];
+                const now = new Date();
+                const month = now.getMonth();
+                const year = now.getFullYear();
+
+                const monthly = payments.filter(payment => {
+                    if (!payment.payment_date) return false;
+                    const d = new Date(payment.payment_date);
+                    return d.getMonth() === month && d.getFullYear() === year;
+                });
+
+                const total = monthly.reduce((sum, payment) => sum + (parseFloat(payment.amount) || 0), 0);
+                titleEl.textContent = `Monthly Revenue List - ₹${total.toLocaleString()}`;
+
+                if (monthly.length === 0) {
+                    contentEl.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No payments recorded this month</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr><th>Member</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th></tr></thead><tbody>';
+                monthly.forEach(payment => {
+                    html += `<tr>
+                        <td>${payment.full_name}</td>
+                        <td>₹${(parseFloat(payment.amount) || 0).toLocaleString()}</td>
+                        <td>${new Date(payment.payment_date).toLocaleDateString()}</td>
+                        <td>${payment.payment_method}</td>
+                        <td>${payment.payment_status}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                contentEl.innerHTML = html;
+                return;
+            }
+
+            if (type === 'trainers') {
+                titleEl.textContent = 'Active Trainers - List';
+                const trainers = await fetchData('/trainers') || [];
+                const active = trainers.filter(trainer => !!trainer.is_available);
+
+                if (active.length === 0) {
+                    contentEl.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No active trainers found</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr><th>ID</th><th>Name</th><th>Specialization</th><th>Experience</th><th>Rate</th></tr></thead><tbody>';
+                active.forEach(trainer => {
+                    html += `<tr>
+                        <td>${trainer.trainer_id}</td>
+                        <td>${trainer.full_name}</td>
+                        <td>${trainer.specialization || 'N/A'}</td>
+                        <td>${trainer.experience_years || 0} years</td>
+                        <td>₹${(parseFloat(trainer.hourly_rate) || 0).toLocaleString()}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                contentEl.innerHTML = html;
+            }
+        }
+
+        async function loadDashboardStats() {
+            const data = await fetchData('/dashboard/stats');
+            if (data) {
+                appState.stats = data;
+                document.getElementById('stat-members').textContent = data.totalMembers || 0;
+                document.getElementById('stat-revenue').textContent = '₹' + (data.totalRevenue || 0).toLocaleString();
+                document.getElementById('stat-attendance').textContent = data.todayAttendance || 0;
+                document.getElementById('stat-trainers').textContent = data.totalTrainers || 0;
+            }
+        }
+
+        async function loadExpiringMemberships() {
+            const data = await fetchData('/expiring-memberships');
+            const container = document.getElementById('expiring-memberships-content');
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No memberships expiring in the next 7 days</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Expires</th><th>Days Left</th></tr></thead><tbody>';
+            data.forEach(member => {
+                html += `<tr>
+                    <td>${member.full_name}</td>
+                    <td>${member.email}</td>
+                    <td>${member.plan_name}</td>
+                    <td>${new Date(member.membership_end).toLocaleDateString()}</td>
+                    <td><span class="badge badge-warning">${member.days_remaining} days</span></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function loadMembers() {
+            const data = await fetchData('/members');
+            const container = document.getElementById('members-content');
+
+            if (!data || data.length === 0) {
+                appState.members = [];
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No members found</p>';
+                return;
+            }
+
+            appState.members = data;
+
+            renderMembersTable();
+        }
+
+        function handleMembersSearch(event) {
+            membersSearchTerm = (event.target.value || '').trim().toLowerCase();
+            renderMembersTable();
+        }
+
+        function renderMembersTable() {
+            const container = document.getElementById('members-content');
+            if (!container) return;
+
+            const term = membersSearchTerm;
+            const data = term
+                ? appState.members.filter(member => {
+                    const searchable = [
+                        member.username,
+                        member.full_name,
+                        member.email,
+                        member.phone,
+                        member.plan_name,
+                        member.trainer_name,
+                        member.status
+                    ]
+                        .filter(Boolean)
+                        .join(' ')
+                        .toLowerCase();
+                    return searchable.includes(term);
+                })
+                : appState.members;
+
+            if (!data || data.length === 0) {
+                const noResultText = term ? 'No members match your search' : 'No members found';
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">${noResultText}</p>`;
+                return;
+            }
+
+            let html = '<table><thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Email</th><th>Phone</th><th>Plan</th><th>Status</th><th>Trainer</th><th>Actions</th></tr></thead><tbody>';
+            data.forEach(member => {
+                const statusClass = member.status === 'active' ? 'badge-success' : member.status === 'expired' ? 'badge-warning' : 'badge-danger';
+                html += `<tr>
+                    <td>${member.gymmer_id}</td>
+                    <td>${member.username || 'N/A'}</td>
+                    <td>${member.full_name}</td>
+                    <td>${member.email}</td>
+                    <td>${member.phone}</td>
+                    <td>${member.plan_name || 'N/A'}</td>
+                    <td><span class="badge ${statusClass}">${member.status}</span></td>
+                    <td>${member.trainer_name || 'N/A'}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-outline" onclick="openEditMember(${member.gymmer_id})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteMember(${member.gymmer_id})">Delete</button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function loadTrainers() {
+            const data = await fetchData('/trainers');
+            const container = document.getElementById('trainers-content');
+
+            if (!data || data.length === 0) {
+                appState.trainers = [];
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No trainers found</p>';
+                return;
+            }
+
+            appState.trainers = data;
+
+            let html = '<table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Specialization</th><th>Experience</th><th>Rate/Hour</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+            data.forEach(trainer => {
+                const statusClass = trainer.is_available ? 'badge-success' : 'badge-danger';
+                const status = trainer.is_available ? 'Available' : 'Unavailable';
+                html += `<tr>
+                    <td>${trainer.trainer_id}</td>
+                    <td>${trainer.full_name}</td>
+                    <td>${trainer.email}</td>
+                    <td>${trainer.phone}</td>
+                    <td>${trainer.specialization || 'N/A'}</td>
+                    <td>${trainer.experience_years} years</td>
+                    <td>₹${trainer.hourly_rate}</td>
+                    <td><span class="badge ${statusClass}">${status}</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-outline" onclick="openEditTrainer(${trainer.trainer_id})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTrainer(${trainer.trainer_id})">Delete</button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function loadPlans() {
+            const data = await fetchData('/plans');
+            const container = document.getElementById('plans-content');
+
+            if (!data || data.length === 0) {
+                appState.plans = [];
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No plans found</p>';
+                return;
+            }
+
+            appState.plans = data;
+
+            let html = '<table><thead><tr><th>ID</th><th>Plan Name</th><th>Duration</th><th>Price</th><th>Trainer Sessions</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+            data.forEach(plan => {
+                const statusClass = plan.is_active ? 'badge-success' : 'badge-danger';
+                const status = plan.is_active ? 'Active' : 'Inactive';
+                html += `<tr>
+                    <td>${plan.plan_id}</td>
+                    <td><strong>${plan.plan_name}</strong></td>
+                    <td>${plan.duration_months} month${plan.duration_months > 1 ? 's' : ''}</td>
+                    <td><strong>₹${parseFloat(plan.price).toLocaleString()}</strong></td>
+                    <td>${plan.max_trainer_sessions} sessions</td>
+                    <td><span class="badge ${statusClass}">${status}</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-outline" onclick="openEditPlan(${plan.plan_id})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePlan(${plan.plan_id})">Delete</button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function loadPayments() {
+            const data = await fetchData('/payments');
+            const container = document.getElementById('payments-content');
+
+            if (!data || data.length === 0) {
+                appState.payments = [];
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No payments found</p>';
+                return;
+            }
+
+            appState.payments = data;
+
+            let html = '<table><thead><tr><th>ID</th><th>Member</th><th>Plan</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+            data.forEach(payment => {
+                const statusClass = payment.payment_status === 'completed' ? 'badge-success' : payment.payment_status === 'pending' ? 'badge-warning' : 'badge-danger';
+                html += `<tr>
+                    <td>${payment.payment_id}</td>
+                    <td>${payment.full_name}</td>
+                    <td>${payment.plan_name}</td>
+                    <td><strong>₹${parseFloat(payment.amount).toLocaleString()}</strong></td>
+                    <td>${new Date(payment.payment_date).toLocaleDateString()}</td>
+                    <td>${payment.payment_method}</td>
+                    <td><span class="badge ${statusClass}">${payment.payment_status}</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-outline" onclick="openEditPayment(${payment.payment_id})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePayment(${payment.payment_id})">Delete</button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function loadAttendance() {
+            const data = await fetchData('/attendance');
+            const container = document.getElementById('attendance-content');
+
+            if (!data || data.length === 0) {
+                appState.attendance = [];
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No attendance records found</p>';
+                return;
+            }
+
+            appState.attendance = data;
+
+            let html = '<table><thead><tr><th>ID</th><th>Member</th><th>Date</th><th>Check In</th><th>Check Out</th><th>Duration</th><th>Actions</th></tr></thead><tbody>';
+            data.forEach(record => {
+                const checkIn = new Date(record.check_in_time).toLocaleTimeString();
+                const checkOut = record.check_out_time ? new Date(record.check_out_time).toLocaleTimeString() : 'N/A';
+                html += `<tr>
+                    <td>${record.attendance_id}</td>
+                    <td>${record.full_name}</td>
+                    <td>${new Date(record.date).toLocaleDateString()}</td>
+                    <td>${checkIn}</td>
+                    <td>${checkOut}</td>
+                    <td>${record.duration_minutes ? record.duration_minutes + ' mins' : 'N/A'}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-outline" onclick="openEditAttendance(${record.attendance_id})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAttendance(${record.attendance_id})">Delete</button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function loadAccessLogs() {
+            const data = await fetchData('/gymmer-access-logs');
+            const container = document.getElementById('access-logs-content');
+
+            if (!data || data.length === 0) {
+                appState.accessLogs = [];
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No gymmer access logs found</p>';
+                return;
+            }
+
+            appState.accessLogs = data;
+            let html = '<table><thead><tr><th>Time</th><th>Gymmer</th><th>Username</th><th>Email</th><th>IP Address</th><th>Source</th></tr></thead><tbody>';
+            data.forEach(log => {
+                html += `<tr>
+                    <td>${new Date(log.login_at).toLocaleString()}</td>
+                    <td>${log.full_name}</td>
+                    <td>${log.username}</td>
+                    <td>${log.email || 'N/A'}</td>
+                    <td>${log.ip_address || 'N/A'}</td>
+                    <td>${log.source_page || 'dashboard'}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function loadRecentData() {
+            const payments = await fetchData('/payments');
+            const attendance = await fetchData('/attendance');
+
+            // Recent payments
+            if (payments && payments.length > 0) {
+                let html = '<table><thead><tr><th>Member</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+                payments.slice(0, 5).forEach(payment => {
+                    const statusClass = payment.payment_status === 'completed' ? 'badge-success' : 'badge-warning';
+                    html += `<tr>
+                        <td>${payment.full_name}</td>
+                        <td><strong>₹${parseFloat(payment.amount).toLocaleString()}</strong></td>
+                        <td>${new Date(payment.payment_date).toLocaleDateString()}</td>
+                        <td><span class="badge ${statusClass}">${payment.payment_status}</span></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('recent-payments-content').innerHTML = html;
+            }
+
+            // Recent attendance
+            if (attendance && attendance.length > 0) {
+                let html = '<table><thead><tr><th>Member</th><th>Time</th><th>Duration</th></tr></thead><tbody>';
+                attendance.slice(0, 5).forEach(record => {
+                    const checkIn = new Date(record.check_in_time).toLocaleTimeString();
+                    html += `<tr>
+                        <td>${record.full_name}</td>
+                        <td>${checkIn}</td>
+                        <td>${record.duration_minutes ? record.duration_minutes + ' mins' : 'Active'}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('recent-attendance-content').innerHTML = html;
+            }
+        }
+
+        // GYMMER FUNCTIONS
+
+        async function loadGymmerHome() {
+            if (!getCurrentGymmerId()) {
+                const ready = await ensureGymmerContext();
+                if (!ready) return;
+            }
+
+            const gymmerId = getCurrentGymmerId();
+            if (!gymmerId) {
+                return;
+            }
+
+            const overview = await fetchData(`/gymmer/${gymmerId}/overview`);
+            if (overview && overview.member) {
+                const member = overview.member;
+                
+                // Update membership status
+                document.getElementById('gymmer-status').textContent = member.status || 'Active';
+                document.getElementById('gymmer-plan').textContent = member.plan_name || 'N/A';
+                document.getElementById('gymmer-trainer-name').textContent = member.trainer_name || 'No Trainer';
+                
+                // Calculate days remaining
+                if (member.membership_end) {
+                    const daysLeft = Math.ceil((new Date(member.membership_end) - new Date()) / (1000 * 60 * 60 * 24));
+                    document.getElementById('gymmer-days-left').textContent = daysLeft > 0 ? daysLeft : 0;
+                }
+                
+                // Load attendance stats
+                const attendance = await fetchData(`/gymmer/${gymmerId}/attendance`);
+                if (attendance) {
+                    const myAttendance = attendance;
+                    updateGymmerAttendanceAction(myAttendance);
+                    const thisMonth = myAttendance.filter(a => {
+                        const date = new Date(a.date);
+                        const now = new Date();
+                        return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+                    });
+                    
+                    document.getElementById('gymmer-attendance').textContent = thisMonth.length;
+                    
+                    const totalMinutes = myAttendance.reduce((sum, a) => sum + (a.duration_minutes || 0), 0);
+                    document.getElementById('gymmer-hours').textContent = Math.floor(totalMinutes / 60);
+                    
+                    // Simple streak calculation (consecutive days)
+                    let streak = 0;
+                    const sortedDates = [...new Set(myAttendance.map(a => a.date))].sort().reverse();
+                    let currentDate = new Date();
+                    currentDate.setHours(0, 0, 0, 0);
+                    
+                    for (const dateStr of sortedDates) {
+                        const attendanceDate = new Date(dateStr);
+                        attendanceDate.setHours(0, 0, 0, 0);
+                        const diffDays = Math.floor((currentDate - attendanceDate) / (1000 * 60 * 60 * 24));
+                        
+                        if (diffDays === streak || diffDays === streak + 1) {
+                            streak = diffDays + 1;
+                        } else {
+                            break;
+                        }
+                    }
+                    document.getElementById('gymmer-streak').textContent = streak;
+                }
+                
+                // Load recent activities
+                loadGymmerRecentActivities();
+            }
+        }
+
+        function updateGymmerAttendanceAction(attendanceRows) {
+            const statusEl = document.getElementById('gymmer-attendance-status');
+            const checkinBtn = document.getElementById('gymmer-checkin-btn');
+            if (!statusEl || !checkinBtn) return;
+
+            const today = new Date().toISOString().split('T')[0];
+            const todayRecord = attendanceRows.find(row => row.date && row.date.toString().slice(0, 10) === today);
+
+            if (todayRecord) {
+                const checkInTime = new Date(todayRecord.check_in_time).toLocaleTimeString();
+                statusEl.textContent = `Checked in today at ${checkInTime}.`;
+                checkinBtn.disabled = true;
+                checkinBtn.style.opacity = '0.6';
+                checkinBtn.style.cursor = 'not-allowed';
+                checkinBtn.textContent = 'Checked In';
+            } else {
+                statusEl.textContent = 'Check in to record today\'s attendance.';
+                checkinBtn.disabled = false;
+                checkinBtn.style.opacity = '1';
+                checkinBtn.style.cursor = 'pointer';
+                checkinBtn.textContent = 'Check In';
+            }
+        }
+
+        async function gymmerCheckIn() {
+            if (!getCurrentGymmerId()) {
+                const ready = await ensureGymmerContext();
+                if (!ready) return;
+            }
+
+            const gymmerId = getCurrentGymmerId();
+            if (!gymmerId) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/gymmer/${gymmerId}/checkin`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    if (response.status === 409) {
+                        showNotification(result.error || 'Already checked in for today', 'info');
+                    } else {
+                        throw new Error(result.error || 'Check-in failed');
+                    }
+                } else {
+                    showNotification('Attendance marked successfully!', 'success');
+                }
+
+                // Reload both gymmer and admin attendance dependent sections.
+                await Promise.all([
+                    loadGymmerHome(),
+                    loadGymmerAttendance(),
+                    loadAttendance(),
+                    loadDashboardStats(),
+                    loadRecentData()
+                ]);
+            } catch (error) {
+                showNotification(error.message || 'Check-in failed', 'error');
+            }
+        }
+
+        async function loadGymmerRecentActivities() {
+            const gymmerId = getCurrentGymmerId();
+            if (!gymmerId) return;
+
+            const attendance = await fetchData(`/gymmer/${gymmerId}/attendance`);
+            const container = document.getElementById('gymmer-recent-activities');
+            
+            if (attendance) {
+                const myAttendance = attendance.slice(0, 5);
+                
+                if (myAttendance.length > 0) {
+                    let html = '<table><thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Duration</th></tr></thead><tbody>';
+                    myAttendance.forEach(record => {
+                        const checkIn = new Date(record.check_in_time).toLocaleTimeString();
+                        const checkOut = record.check_out_time ? new Date(record.check_out_time).toLocaleTimeString() : 'Active';
+                        html += `<tr>
+                            <td>${new Date(record.date).toLocaleDateString()}</td>
+                            <td>${checkIn}</td>
+                            <td>${checkOut}</td>
+                            <td>${record.duration_minutes ? record.duration_minutes + ' mins' : 'In Progress'}</td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No recent activities</p>';
+                }
+            }
+        }
+
+        async function loadGymmerProfile() {
+            if (!getCurrentGymmerId()) {
+                const ready = await ensureGymmerContext();
+                if (!ready) return;
+            }
+
+            const gymmerId = getCurrentGymmerId();
+            if (!gymmerId) {
+                return;
+            }
+
+            const overview = await fetchData(`/gymmer/${gymmerId}/overview`);
+            const container = document.getElementById('gymmer-profile-content');
+            
+            if (overview && overview.member) {
+                const member = overview.member;
+                let html = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; padding: 1rem 0;">
+                        <div>
+                            <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Full Name</p>
+                            <p style="font-size: 1.2rem; font-weight: 600;">${member.full_name}</p>
+                        </div>
+                        <div>
+                            <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Email</p>
+                            <p style="font-size: 1.2rem; font-weight: 600;">${member.email}</p>
+                        </div>
+                        <div>
+                            <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Phone</p>
+                            <p style="font-size: 1.2rem; font-weight: 600;">${member.phone}</p>
+                        </div>
+                        <div>
+                            <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Gender</p>
+                            <p style="font-size: 1.2rem; font-weight: 600;">${member.gender || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Join Date</p>
+                            <p style="font-size: 1.2rem; font-weight: 600;">${new Date(member.join_date).toLocaleDateString()}</p>
+                        </div>
+                        <div>
+                            <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Membership Plan</p>
+                            <p style="font-size: 1.2rem; font-weight: 600;">${member.plan_name || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Membership Start</p>
+                            <p style="font-size: 1.2rem; font-weight: 600;">${member.membership_start ? new Date(member.membership_start).toLocaleDateString() : 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Membership End</p>
+                            <p style="font-size: 1.2rem; font-weight: 600;">${member.membership_end ? new Date(member.membership_end).toLocaleDateString() : 'N/A'}</p>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">Profile not found</p>';
+            }
+        }
+
+        async function loadGymmerAttendance() {
+            const gymmerId = getCurrentGymmerId();
+            if (!gymmerId) return;
+
+            const attendance = await fetchData(`/gymmer/${gymmerId}/attendance`);
+            const container = document.getElementById('gymmer-my-attendance-content');
+            
+            if (attendance) {
+                const myAttendance = attendance;
+                
+                if (myAttendance.length > 0) {
+                    let html = '<table><thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Duration</th></tr></thead><tbody>';
+                    myAttendance.forEach(record => {
+                        const checkIn = new Date(record.check_in_time).toLocaleTimeString();
+                        const checkOut = record.check_out_time ? new Date(record.check_out_time).toLocaleTimeString() : 'Active';
+                        html += `<tr>
+                            <td>${new Date(record.date).toLocaleDateString()}</td>
+                            <td>${checkIn}</td>
+                            <td>${checkOut}</td>
+                            <td>${record.duration_minutes ? record.duration_minutes + ' mins' : 'In Progress'}</td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No attendance records</p>';
+                }
+            }
+        }
+
+        async function loadGymmerPayments() {
+            const gymmerId = getCurrentGymmerId();
+            if (!gymmerId) return;
+
+            const payments = await fetchData(`/gymmer/${gymmerId}/payments`);
+            const container = document.getElementById('gymmer-my-payments-content');
+            
+            if (payments) {
+                const myPayments = payments;
+                
+                if (myPayments.length > 0) {
+                    let html = '<table><thead><tr><th>Date</th><th>Plan</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead><tbody>';
+                    myPayments.forEach(payment => {
+                        const statusClass = payment.payment_status === 'completed' ? 'badge-success' : payment.payment_status === 'pending' ? 'badge-warning' : 'badge-danger';
+                        html += `<tr>
+                            <td>${new Date(payment.payment_date).toLocaleDateString()}</td>
+                            <td>${payment.plan_name}</td>
+                            <td><strong>₹${parseFloat(payment.amount).toLocaleString()}</strong></td>
+                            <td>${payment.payment_method}</td>
+                            <td><span class="badge ${statusClass}">${payment.payment_status}</span></td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No payment records</p>';
+                }
+            }
+        }
+
+        async function loadGymmerTrainer() {
+            const gymmerId = getCurrentGymmerId();
+            if (!gymmerId) return;
+
+            const overview = await fetchData(`/gymmer/${gymmerId}/overview`);
+            const container = document.getElementById('gymmer-trainer-info');
+            
+            if (overview && overview.member && overview.member.trainer_id) {
+                const trainer = {
+                    trainer_id: overview.member.trainer_id,
+                    full_name: overview.member.trainer_name,
+                    email: overview.member.trainer_email,
+                    phone: overview.member.trainer_phone,
+                    specialization: overview.member.specialization,
+                    experience_years: null,
+                    is_available: true
+                };
+                
+                if (trainer) {
+                    let html = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; padding: 1rem 0;">
+                            <div>
+                                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Trainer Name</p>
+                                <p style="font-size: 1.5rem; font-weight: 700;">${trainer.full_name}</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Email</p>
+                                <p style="font-size: 1.2rem; font-weight: 600;">${trainer.email}</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Phone</p>
+                                <p style="font-size: 1.2rem; font-weight: 600;">${trainer.phone}</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Specialization</p>
+                                <p style="font-size: 1.2rem; font-weight: 600;">${trainer.specialization || 'General Fitness'}</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Experience</p>
+                                <p style="font-size: 1.2rem; font-weight: 600;">${trainer.experience_years ? trainer.experience_years + ' years' : 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Availability</p>
+                                <p style="font-size: 1.2rem; font-weight: 600;">
+                                    <span class="badge ${trainer.is_available ? 'badge-success' : 'badge-danger'}">
+                                        ${trainer.is_available ? 'Available' : 'Unavailable'}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">Trainer information not available</p>';
+                }
+            } else {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No trainer assigned yet</p>';
+            }
+        }
+
+        // ==================== MODAL FUNCTIONS ====================
+        
+        const modalDefaults = {
+            'add-member': { title: 'Add New Member', submit: 'Add Member' },
+            'add-trainer': { title: 'Add New Trainer', submit: 'Add Trainer' },
+            'add-plan': { title: 'Add Membership Plan', submit: 'Add Plan' },
+            'add-payment': { title: 'Record Payment', submit: 'Record Payment' },
+            'add-attendance': { title: 'Record Attendance', submit: 'Record Attendance' }
+        };
+
+        // Open modal
+        async function openModal(modalType, mode = 'add') {
+            const modal = document.getElementById(`${modalType}-modal`);
+            if (modal) {
+                setFormMode(modalType, mode);
+                modal.style.display = 'flex';
+                
+                await ensureLookupData(modalType);
+                // Populate dropdowns if needed
+                if (modalType === 'add-member') {
+                    populateMemberFormDropdowns();
+                } else if (modalType === 'add-payment') {
+                    populatePaymentFormDropdowns();
+                } else if (modalType === 'add-attendance') {
+                    populateAttendanceFormDropdowns();
+                }
+            }
+        }
+
+        // Close modal
+        function closeModal(modalType) {
+            const modal = document.getElementById(`${modalType}-modal`);
+            if (modal) {
+                modal.style.display = 'none';
+                // Reset form
+                const form = modal.querySelector('form');
+                if (form) form.reset();
+                setFormMode(modalType, 'add');
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                const modal = event.target;
+                modal.style.display = 'none';
+                const modalType = modal.id.replace('-modal', '');
+                const form = modal.querySelector('form');
+                if (form) form.reset();
+                setFormMode(modalType, 'add');
+            }
+        }
+
+        function setFormMode(modalType, mode, title, submitText) {
+            const modal = document.getElementById(`${modalType}-modal`);
+            if (!modal) return;
+
+            const form = modal.querySelector('form');
+            const titleEl = modal.querySelector('.modal-header h3');
+            const submitBtn = modal.querySelector('button[type="submit"]');
+            const defaults = modalDefaults[modalType] || { title: '', submit: '' };
+
+            if (form) {
+                form.dataset.mode = mode;
+                const hiddenId = form.querySelector('input[type="hidden"]');
+                if (hiddenId && mode === 'add') hiddenId.value = '';
+            }
+
+            if (titleEl) titleEl.textContent = title || defaults.title;
+            if (submitBtn) submitBtn.textContent = submitText || defaults.submit;
+        }
+
+        async function ensureLookupData(modalType) {
+            const needsMembers = (modalType === 'add-payment' || modalType === 'add-attendance') && appState.members.length === 0;
+            const needsPlans = (modalType === 'add-member' || modalType === 'add-payment') && appState.plans.length === 0;
+            const needsTrainers = modalType === 'add-member' && appState.trainers.length === 0;
+
+            const loaders = [];
+            if (needsMembers) loaders.push(loadMembers());
+            if (needsPlans) loaders.push(loadPlans());
+            if (needsTrainers) loaders.push(loadTrainers());
+
+            if (loaders.length > 0) {
+                await Promise.all(loaders);
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            // Remove existing notifications
+            const existing = document.querySelector('.notification');
+            if (existing) existing.remove();
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        // ==================== POPULATE DROPDOWNS ====================
+        
+        function populateMemberFormDropdowns() {
+            // Populate plans
+            const planSelect = document.getElementById('member-plan-select');
+            planSelect.innerHTML = '<option value="">Select Plan</option>';
+            appState.plans.forEach(plan => {
+                planSelect.innerHTML += `<option value="${plan.plan_id}">${plan.plan_name} - ₹${plan.price}</option>`;
+            });
+
+            // Populate trainers
+            const trainerSelect = document.getElementById('member-trainer-select');
+            trainerSelect.innerHTML = '<option value="">No Trainer</option>';
+            appState.trainers.filter(t => t.is_available).forEach(trainer => {
+                trainerSelect.innerHTML += `<option value="${trainer.trainer_id}">${trainer.full_name}</option>`;
+            });
+        }
+
+        function populatePaymentFormDropdowns() {
+            // Populate members
+            const memberSelect = document.getElementById('payment-member-select');
+            memberSelect.innerHTML = '<option value="">Select Member</option>';
+            appState.members.forEach(member => {
+                memberSelect.innerHTML += `<option value="${member.gymmer_id}">${member.full_name}</option>`;
+            });
+
+            // Populate plans
+            const planSelect = document.getElementById('payment-plan-select');
+            planSelect.innerHTML = '<option value="">Select Plan</option>';
+            appState.plans.forEach(plan => {
+                planSelect.innerHTML += `<option value="${plan.plan_id}">${plan.plan_name} - ₹${plan.price}</option>`;
+            });
+        }
+
+        function populateAttendanceFormDropdowns() {
+            // Populate members
+            const memberSelect = document.getElementById('attendance-member-select');
+            memberSelect.innerHTML = '<option value="">Select Member</option>';
+            appState.members.forEach(member => {
+                memberSelect.innerHTML += `<option value="${member.gymmer_id}">${member.full_name}</option>`;
+            });
+
+            // Set today's date as default
+            const dateInput = document.querySelector('#add-attendance-form input[name="date"]');
+            if (dateInput) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        function formatDateInput(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toISOString().split('T')[0];
+        }
+
+        function formatTimeInput(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            if (!Number.isNaN(date.getTime())) {
+                return date.toISOString().slice(11, 16);
+            }
+            return value.toString().slice(0, 5);
+        }
+
+        async function refreshAllData() {
+            await Promise.all([
+                loadMembers(),
+                loadTrainers(),
+                loadPlans(),
+                loadPayments(),
+                loadAttendance(),
+                loadAccessLogs(),
+                loadDashboardStats(),
+                loadRecentData(),
+                loadExpiringMemberships()
+            ]);
+
+            if (currentView === 'gymmer') {
+                await Promise.all([
+                    loadGymmerHome(),
+                    loadGymmerProfile(),
+                    loadGymmerAttendance(),
+                    loadGymmerPayments(),
+                    loadGymmerTrainer()
+                ]);
+            }
+        }
+
+        // ==================== EDIT ACTIONS ====================
+
+        async function openEditMember(id) {
+            const listMember = appState.members.find(m => m.gymmer_id === id);
+            if (!listMember) return showNotification('Member not found', 'error');
+
+            const member = await fetchData(`/members/${id}`) || listMember;
+
+            await openModal('add-member', 'edit');
+            setFormMode('add-member', 'edit', 'Edit Member', 'Update Member');
+
+            const form = document.getElementById('add-member-form');
+            const derivedUsername = member.username || (member.email ? member.email.split('@')[0] : '');
+            form.querySelector('input[name="gymmer_id"]').value = member.gymmer_id;
+            form.querySelector('input[name="username"]').value = derivedUsername;
+            form.querySelector('input[name="full_name"]').value = member.full_name || '';
+            form.querySelector('input[name="email"]').value = member.email || '';
+            form.querySelector('input[name="phone"]').value = member.phone || '';
+            form.querySelector('input[name="date_of_birth"]').value = formatDateInput(member.date_of_birth);
+            form.querySelector('select[name="gender"]').value = member.gender || '';
+            form.querySelector('select[name="plan_id"]').value = member.plan_id || '';
+            form.querySelector('select[name="trainer_id"]').value = member.trainer_id || '';
+            form.querySelector('textarea[name="address"]').value = member.address || '';
+        }
+
+        async function openEditTrainer(id) {
+            const trainer = appState.trainers.find(t => t.trainer_id === id);
+            if (!trainer) return showNotification('Trainer not found', 'error');
+
+            await openModal('add-trainer', 'edit');
+            setFormMode('add-trainer', 'edit', 'Edit Trainer', 'Update Trainer');
+
+            const form = document.getElementById('add-trainer-form');
+            form.querySelector('input[name="trainer_id"]').value = trainer.trainer_id;
+            form.querySelector('input[name="full_name"]').value = trainer.full_name || '';
+            form.querySelector('input[name="email"]').value = trainer.email || '';
+            form.querySelector('input[name="phone"]').value = trainer.phone || '';
+            form.querySelector('input[name="specialization"]').value = trainer.specialization || '';
+            form.querySelector('input[name="certification"]').value = trainer.certification || '';
+            form.querySelector('input[name="experience_years"]').value = trainer.experience_years || 0;
+            form.querySelector('input[name="hourly_rate"]').value = trainer.hourly_rate || 0;
+            form.querySelector('textarea[name="bio"]').value = trainer.bio || '';
+        }
+
+        async function openEditPlan(id) {
+            const plan = appState.plans.find(p => p.plan_id === id);
+            if (!plan) return showNotification('Plan not found', 'error');
+
+            await openModal('add-plan', 'edit');
+            setFormMode('add-plan', 'edit', 'Edit Plan', 'Update Plan');
+
+            const form = document.getElementById('add-plan-form');
+            form.querySelector('input[name="plan_id"]').value = plan.plan_id;
+            form.querySelector('input[name="plan_name"]').value = plan.plan_name || '';
+            form.querySelector('input[name="duration_months"]').value = plan.duration_months || 1;
+            form.querySelector('input[name="price"]').value = plan.price || 0;
+            form.querySelector('textarea[name="description"]').value = plan.description || '';
+            form.querySelector('input[name="max_trainer_sessions"]').value = plan.max_trainer_sessions || 0;
+        }
+
+        async function openEditPayment(id) {
+            const payment = appState.payments.find(p => p.payment_id === id);
+            if (!payment) return showNotification('Payment not found', 'error');
+
+            await openModal('add-payment', 'edit');
+            setFormMode('add-payment', 'edit', 'Edit Payment', 'Update Payment');
+
+            const form = document.getElementById('add-payment-form');
+            form.querySelector('input[name="payment_id"]').value = payment.payment_id;
+            form.querySelector('select[name="gymmer_id"]').value = payment.gymmer_id || '';
+            form.querySelector('select[name="plan_id"]').value = payment.plan_id || '';
+            form.querySelector('input[name="amount"]').value = payment.amount || 0;
+            form.querySelector('select[name="payment_method"]').value = payment.payment_method || 'cash';
+            form.querySelector('input[name="payment_date"]').value = formatDateInput(payment.payment_date);
+            form.querySelector('select[name="payment_status"]').value = payment.payment_status || 'completed';
+        }
+
+        async function openEditAttendance(id) {
+            const record = appState.attendance.find(a => a.attendance_id === id);
+            if (!record) return showNotification('Attendance record not found', 'error');
+
+            await openModal('add-attendance', 'edit');
+            setFormMode('add-attendance', 'edit', 'Edit Attendance', 'Update Attendance');
+
+            const form = document.getElementById('add-attendance-form');
+            form.querySelector('input[name="attendance_id"]').value = record.attendance_id;
+            form.querySelector('select[name="gymmer_id"]').value = record.gymmer_id || '';
+            form.querySelector('input[name="date"]').value = formatDateInput(record.date);
+            form.querySelector('input[name="check_in_time"]').value = formatTimeInput(record.check_in_time);
+            form.querySelector('input[name="check_out_time"]').value = formatTimeInput(record.check_out_time);
+        }
+
+        // ==================== DELETE ACTIONS ====================
+
+        async function deleteMember(id) {
+            if (!confirm('Deactivate this member?')) return;
+            await handleDelete(`/members/${id}`, 'Member deactivated successfully');
+        }
+
+        async function deleteTrainer(id) {
+            if (!confirm('Deactivate this trainer?')) return;
+            await handleDelete(`/trainers/${id}`, 'Trainer deactivated successfully');
+        }
+
+        async function deletePlan(id) {
+            if (!confirm('Deactivate this plan?')) return;
+            await handleDelete(`/plans/${id}`, 'Plan deactivated successfully');
+        }
+
+        async function deletePayment(id) {
+            if (!confirm('Delete this payment record?')) return;
+            await handleDelete(`/payments/${id}`, 'Payment deleted successfully');
+        }
+
+        async function deleteAttendance(id) {
+            if (!confirm('Delete this attendance record?')) return;
+            await handleDelete(`/attendance/${id}`, 'Attendance record deleted successfully');
+        }
+
+        async function handleDelete(endpoint, successMessage) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showNotification(successMessage, 'success');
+                    await refreshAllData();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.error || 'Delete failed', 'error');
+                }
+            } catch (error) {
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+
+        // ==================== FORM SUBMISSION HANDLERS ====================
+        
+        async function handleAddMember(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            const memberId = data.gymmer_id;
+            const isEdit = form.dataset.mode === 'edit' && memberId;
+            
+            // Convert empty trainer to null
+            if (!data.trainer_id) data.trainer_id = null;
+
+            // Keep username populated even for old records that were created without one.
+            if (!data.username && data.email) {
+                data.username = data.email.split('@')[0];
+            }
+
+            if (!data.username || !data.plan_id) {
+                showNotification('Username and Membership Plan are required', 'error');
+                return;
+            }
+
+            if (!isEdit) delete data.gymmer_id;
+            
+            try {
+                const response = await fetch(`${API_BASE}/members${isEdit ? '/' + memberId : ''}`, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showNotification(isEdit ? 'Member updated successfully!' : 'Member added successfully!', 'success');
+                    closeModal('add-member');
+                    await refreshAllData();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.error || 'Failed to add member', 'error');
+                }
+            } catch (error) {
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function handleAddTrainer(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            const trainerId = data.trainer_id;
+            const isEdit = form.dataset.mode === 'edit' && trainerId;
+            if (!isEdit) delete data.trainer_id;
+            
+            try {
+                const response = await fetch(`${API_BASE}/trainers${isEdit ? '/' + trainerId : ''}`, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showNotification(isEdit ? 'Trainer updated successfully!' : 'Trainer added successfully!', 'success');
+                    closeModal('add-trainer');
+                    await refreshAllData();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.error || 'Failed to add trainer', 'error');
+                }
+            } catch (error) {
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function handleAddPlan(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            const planId = data.plan_id;
+            const isEdit = form.dataset.mode === 'edit' && planId;
+            if (!isEdit) delete data.plan_id;
+            
+            try {
+                const response = await fetch(`${API_BASE}/plans${isEdit ? '/' + planId : ''}`, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showNotification(isEdit ? 'Plan updated successfully!' : 'Plan added successfully!', 'success');
+                    closeModal('add-plan');
+                    await refreshAllData();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.error || 'Failed to add plan', 'error');
+                }
+            } catch (error) {
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function handleAddPayment(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            const paymentId = data.payment_id;
+            const isEdit = form.dataset.mode === 'edit' && paymentId;
+            if (!isEdit) delete data.payment_id;
+            
+            try {
+                const response = await fetch(`${API_BASE}/payments${isEdit ? '/' + paymentId : ''}`, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showNotification(isEdit ? 'Payment updated successfully!' : 'Payment recorded successfully!', 'success');
+                    closeModal('add-payment');
+                    await refreshAllData();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.error || 'Failed to record payment', 'error');
+                }
+            } catch (error) {
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function handleAddAttendance(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            const attendanceId = data.attendance_id;
+            const isEdit = form.dataset.mode === 'edit' && attendanceId;
+            
+            // Remove check_out_time if empty
+            if (!data.check_out_time) delete data.check_out_time;
+
+            if (!isEdit) delete data.attendance_id;
+            
+            try {
+                const response = await fetch(`${API_BASE}/attendance${isEdit ? '/' + attendanceId : ''}`, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showNotification(isEdit ? 'Attendance updated successfully!' : 'Attendance recorded successfully!', 'success');
+                    closeModal('add-attendance');
+                    await refreshAllData();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.error || 'Failed to record attendance', 'error');
+                }
+            } catch (error) {
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', async () => {
+            updateGymmerSessionUI();
+            await checkDatabaseConnection();
+            openStartupSelector();
+        });
+
+        // Refresh database connection every 30 seconds
+        setInterval(async () => {
+            await checkDatabaseConnection();
+        }, 30000);
+    </script>
+</body>
+</html>

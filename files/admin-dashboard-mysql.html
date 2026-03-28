@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymFit Pro - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-red: #FF0844;
+            --secondary-red: #C70039;
+            --dark-bg: #0A0A0A;
+            --card-bg: #161616;
+            --accent-yellow: #FFB800;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --border-color: #2A2A2A;
+            --success: #00FF88;
+            --warning: #FFB800;
+            --danger: #FF0844;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 8, 68, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 184, 0, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #161616 0%, #0A0A0A 100%);
+            border-right: 2px solid var(--border-color);
+            padding: 2rem 0;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 2rem 2rem 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--accent-yellow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            letter-spacing: 3px;
+        }
+
+        .nav-menu {
+            padding: 2rem 0;
+        }
+
+        .nav-item {
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 8, 68, 0.1);
+            color: var(--primary-red);
+            border-left-color: var(--primary-red);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #1a1a1a 100%);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary-red);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 8, 68, 0.2);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-red);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-top: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Table Styles */
+        .card {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #1a1a1a 100%);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent-yellow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: rgba(255, 8, 68, 0.1);
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--accent-yellow);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background: rgba(255, 8, 68, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(255, 184, 0, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(255, 8, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            background: rgba(255, 8, 68, 0.2);
+            color: var(--danger);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .db-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 99;
+        }
+
+        .db-status.connected {
+            border-color: var(--success);
+        }
+
+        .db-status.connected::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .db-status.disconnected {
+            border-color: var(--danger);
+        }
+
+        .db-status.disconnected::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--danger);
+            border-radius: 50%;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            .main-content {
+                margin-left: 200px;
+                padding: 1rem;
+            }
+            .header h2 {
+                font-size: 1.8rem;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>GymFit</h1>
+                <p>Pro Dashboard</p>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item active" onclick="loadSection('dashboard')">
+                    <span style="font-size: 1.3rem;">📊</span>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('members')">
+                    <span style="font-size: 1.3rem;">👥</span>
+                    <span>Members</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('trainers')">
+                    <span style="font-size: 1.3rem;">🏃</span>
+                    <span>Trainers</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('payments')">
+                    <span style="font-size: 1.3rem;">💳</span>
+                    <span>Payments</span>
+                </div>
+                <div class="nav-item" onclick="loadSection('attendance')">
+                    <span style="font-size: 1.3rem;">📋</span>
+                    <span>Attendance</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h2>Dashboard</h2>
+                <div style="color: var(--text-secondary);">
+                    <span id="current-date"></span>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard-section">
+                <div class="grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Active Members</div>
+                        <div class="stat-value" id="stat-members">--</div>
+                        <div class="stat-icon">👥</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Monthly Revenue</div>
+                        <div class="stat-value" id="stat-revenue">₹--</div>
+                        <div class="stat-icon">💰</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Today's Attendance</div>
+                        <div class="stat-value" id="stat-attendance">--</div>
+                        <div class="stat-icon">📋</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Trainers</div>
+                        <div class="stat-value" id="stat-trainers">--</div>
+                        <div class="stat-icon">🏃</div>
+                    </div>
+                </div>
+
+                <!-- Expiring Memberships -->
+                <div class="card">
+                    <h3>Expiring Memberships (Next 7 Days)</h3>
+                    <div id="expiring-memberships-content">
+                        <div class="loading">Loading expiring memberships...</div>
+                    </div>
+                </div>
+
+                <!-- Recent Payments -->
+                <div class="card">
+                    <h3>Recent Payments</h3>
+                    <div id="recent-payments-content">
+                        <div class="loading">Loading payments...</div>
+                    </div>
+                </div>
+
+                <!-- Recent Attendance -->
+                <div class="card">
+                    <h3>Recent Attendance</h3>
+                    <div id="recent-attendance-content">
+                        <div class="loading">Loading attendance...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Members Section -->
+            <div id="members-section" style="display: none;">
+                <div class="card">
+                    <h3>All Members</h3>
+                    <div id="members-content">
+                        <div class="loading">Loading members...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trainers Section -->
+            <div id="trainers-section" style="display: none;">
+                <div class="card">
+                    <h3>All Trainers</h3>
+                    <div id="trainers-content">
+                        <div class="loading">Loading trainers...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payments Section -->
+            <div id="payments-section" style="display: none;">
+                <div class="card">
+                    <h3>Payment History</h3>
+                    <div id="payments-content">
+                        <div class="loading">Loading payments...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Section -->
+            <div id="attendance-section" style="display: none;">
+                <div class="card">
+                    <h3>Attendance Records</h3>
+                    <div id="attendance-content">
+                        <div class="loading">Loading attendance...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Status Indicator -->
+    <div class="db-status" id="db-status">
+        <span id="db-status-text">Connecting...</span>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://localhost:3001/api';
+
+        // Update current date
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Application state
+        let appState = {
+            stats: {},
+            members: [],
+            trainers: [],
+            payments: [],
+            attendance: []
+        };
+
+        // Check database connection
+        async function checkDatabaseConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    setDatabaseStatus(true);
+                    return true;
+                }
+            } catch (error) {
+                setDatabaseStatus(false);
+                return false;
+            }
+        }
+
+        // Set database status indicator
+        function setDatabaseStatus(connected) {
+            const statusEl = document.getElementById('db-status');
+            const textEl = document.getElementById('db-status-text');
+            
+            if (connected) {
+                statusEl.classList.remove('disconnected');
+                statusEl.classList.add('connected');
+                textEl.textContent = 'Database Connected';
+            } else {
+                statusEl.classList.remove('connected');
+                statusEl.classList.add('disconnected');
+                textEl.textContent = 'Database Disconnected';
+            }
+        }
+
+        // API call helper
+        async function fetchData(endpoint) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching ${endpoint}:`, error);
+                return null;
+            }
+        }
+
+        // Load dashboard statistics
+        async function loadDashboardStats() {
+            const data = await fetchData('/dashboard/stats');
+            if (data) {
+                appState.stats = data;
+                document.getElementById('stat-members').textContent = data.totalMembers;
+                document.getElementById('stat-revenue').textContent = '₹' + data.totalRevenue.toLocaleString();
+                document.getElementById('stat-attendance').textContent = data.todayAttendance;
+                document.getElementById('stat-trainers').textContent = data.totalTrainers;
+            }
+        }
+
+        // Load expiring memberships
+        async function loadExpiringMemberships() {
+            const data = await fetchData('/expiring-memberships');
+            const container = document.getElementById('expiring-memberships-content');
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No memberships expiring in the next 7 days</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Expires</th><th>Days Left</th></tr></thead><tbody>';
+            data.forEach(member => {
+                html += `<tr>
+                    <td>${member.full_name}</td>
+                    <td>${member.email}</td>
+                    <td>${member.plan_name}</td>
+                    <td>${new Date(member.membership_end).toLocaleDateString()}</td>
+                    <td><span class="badge badge-warning">${member.days_remaining} days</span></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Load members
+        async function loadMembers() {
+            const data = await fetchData('/members');
+            const container = document.getElementById('members-content');
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No members found</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Plan</th><th>Status</th><th>Trainer</th></tr></thead><tbody>';
+            data.forEach(member => {
+                const statusClass = member.status === 'active' ? 'badge-success' : member.status === 'expired' ? 'badge-warning' : 'badge-danger';
+                html += `<tr>
+                    <td>${member.full_name}</td>
+                    <td>${member.email}</td>
+                    <td>${member.phone}</td>
+                    <td>${member.plan_name || 'N/A'}</td>
+                    <td><span class="badge ${statusClass}">${member.status}</span></td>
+                    <td>${member.trainer_name || 'N/A'}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Load trainers
+        async function loadTrainers() {
+            const data = await fetchData('/trainers');
+            const container = document.getElementById('trainers-content');
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No trainers found</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Name</th><th>Email</th><th>Specialization</th><th>Experience</th><th>Rate/Hour</th><th>Status</th></tr></thead><tbody>';
+            data.forEach(trainer => {
+                const statusClass = trainer.is_available ? 'badge-success' : 'badge-danger';
+                const status = trainer.is_available ? 'Available' : 'Unavailable';
+                html += `<tr>
+                    <td>${trainer.full_name}</td>
+                    <td>${trainer.email}</td>
+                    <td>${trainer.specialization || 'N/A'}</td>
+                    <td>${trainer.experience_years} years</td>
+                    <td>₹${trainer.hourly_rate}</td>
+                    <td><span class="badge ${statusClass}">${status}</span></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Load payments
+        async function loadPayments() {
+            const data = await fetchData('/payments');
+            const container = document.getElementById('payments-content');
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No payments found</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Member</th><th>Plan</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th></tr></thead><tbody>';
+            data.forEach(payment => {
+                const statusClass = payment.payment_status === 'completed' ? 'badge-success' : payment.payment_status === 'pending' ? 'badge-warning' : 'badge-danger';
+                html += `<tr>
+                    <td>${payment.full_name}</td>
+                    <td>${payment.plan_name}</td>
+                    <td>₹${payment.amount.toLocaleString()}</td>
+                    <td>${new Date(payment.payment_date).toLocaleDateString()}</td>
+                    <td>${payment.payment_method}</td>
+                    <td><span class="badge ${statusClass}">${payment.payment_status}</span></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Load attendance
+        async function loadAttendance() {
+            const data = await fetchData('/attendance');
+            const container = document.getElementById('attendance-content');
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No attendance records found</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Member</th><th>Date</th><th>Check In</th><th>Check Out</th><th>Duration</th></tr></thead><tbody>';
+            data.forEach(record => {
+                const checkIn = new Date(record.check_in_time).toLocaleTimeString();
+                const checkOut = record.check_out_time ? new Date(record.check_out_time).toLocaleTimeString() : 'N/A';
+                html += `<tr>
+                    <td>${record.full_name}</td>
+                    <td>${new Date(record.date).toLocaleDateString()}</td>
+                    <td>${checkIn}</td>
+                    <td>${checkOut}</td>
+                    <td>${record.duration_minutes || 'N/A'} mins</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Load recent data for dashboard
+        async function loadRecentData() {
+            const payments = await fetchData('/payments');
+            const attendance = await fetchData('/attendance');
+
+            // Recent payments
+            if (payments && payments.length > 0) {
+                let html = '<table><thead><tr><th>Member</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+                payments.slice(0, 5).forEach(payment => {
+                    const statusClass = payment.payment_status === 'completed' ? 'badge-success' : 'badge-warning';
+                    html += `<tr>
+                        <td>${payment.full_name}</td>
+                        <td>₹${payment.amount.toLocaleString()}</td>
+                        <td>${new Date(payment.payment_date).toLocaleDateString()}</td>
+                        <td><span class="badge ${statusClass}">${payment.payment_status}</span></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('recent-payments-content').innerHTML = html;
+            }
+
+            // Recent attendance
+            if (attendance && attendance.length > 0) {
+                let html = '<table><thead><tr><th>Member</th><th>Time</th><th>Duration</th></tr></thead><tbody>';
+                attendance.slice(0, 5).forEach(record => {
+                    const checkIn = new Date(record.check_in_time).toLocaleTimeString();
+                    html += `<tr>
+                        <td>${record.full_name}</td>
+                        <td>${checkIn}</td>
+                        <td>${record.duration_minutes || 'N/A'} mins</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('recent-attendance-content').innerHTML = html;
+            }
+        }
+
+        // Load section
+        function loadSection(section) {
+            // Hide all sections
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('members-section').style.display = 'none';
+            document.getElementById('trainers-section').style.display = 'none';
+            document.getElementById('payments-section').style.display = 'none';
+            document.getElementById('attendance-section').style.display = 'none';
+
+            // Reset nav items
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+
+            // Show selected section and load data
+            if (section === 'dashboard') {
+                document.getElementById('dashboard-section').style.display = 'block';
+                loadDashboardStats();
+                loadExpiringMemberships();
+                loadRecentData();
+            } else if (section === 'members') {
+                document.getElementById('members-section').style.display = 'block';
+                loadMembers();
+            } else if (section === 'trainers') {
+                document.getElementById('trainers-section').style.display = 'block';
+                loadTrainers();
+            } else if (section === 'payments') {
+                document.getElementById('payments-section').style.display = 'block';
+                loadPayments();
+            } else if (section === 'attendance') {
+                document.getElementById('attendance-section').style.display = 'block';
+                loadAttendance();
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', async () => {
+            await checkDatabaseConnection();
+            loadSection('dashboard');
+        });
+
+        // Refresh data every 30 seconds
+        setInterval(async () => {
+            await checkDatabaseConnection();
+        }, 30000);
+    </script>
+</body>
+</html>

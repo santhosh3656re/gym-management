@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymFit Pro - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-red: #FF0844;
+            --secondary-red: #C70039;
+            --dark-bg: #0A0A0A;
+            --card-bg: #161616;
+            --accent-yellow: #FFB800;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --border-color: #2A2A2A;
+            --success: #00FF88;
+            --warning: #FFB800;
+            --danger: #FF0844;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 8, 68, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 184, 0, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #161616 0%, #0A0A0A 100%);
+            border-right: 2px solid var(--border-color);
+            padding: 2rem 0;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 2rem 2rem 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--accent-yellow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            letter-spacing: 3px;
+        }
+
+        .nav-menu {
+            padding: 2rem 0;
+        }
+
+        .nav-item {
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 8, 68, 0.1);
+            color: var(--primary-red);
+            border-left-color: var(--primary-red);
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .notification-btn:hover {
+            border-color: var(--primary-red);
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary-red);
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--card-bg);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            border: 2px solid var(--border-color);
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-red), var(--accent-yellow));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .user-details h4 {
+            font-size: 1rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .user-details p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-red) 0%, var(--accent-yellow) 100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-red);
+            box-shadow: 0 10px 40px rgba(255, 8, 68, 0.3);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-title {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .stat-icon.red {
+            background: rgba(255, 8, 68, 0.15);
+            color: var(--primary-red);
+        }
+
+        .stat-icon.yellow {
+            background: rgba(255, 184, 0, 0.15);
+            color: var(--accent-yellow);
+        }
+
+        .stat-icon.green {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--success);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .stat-change.positive {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            background: rgba(255, 8, 68, 0.15);
+            color: var(--danger);
+        }
+
+        /* Content Sections */
+        .content-section {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--secondary-red) 100%);
+            color: white;
+            border: 2px solid transparent;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 8, 68, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-red);
+            color: var(--primary-red);
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.5rem;
+        }
+
+        .data-table thead {
+            background: transparent;
+        }
+
+        .data-table th {
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .data-table tbody tr {
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(255, 8, 68, 0.1);
+            transform: scale(1.01);
+        }
+
+        .data-table td {
+            padding: 1.2rem 1rem;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table tbody tr td:first-child {
+            border-left: 1px solid var(--border-color);
+            border-radius: 10px 0 0 10px;
+        }
+
+        .data-table tbody tr td:last-child {
+            border-right: 1px solid var(--border-color);
+            border-radius: 0 10px 10px 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.active {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-badge.expired {
+            background: rgba(255, 8, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .status-badge.pending {
+            background: rgba(255, 184, 0, 0.15);
+            color: var(--accent-yellow);
+            border: 1px solid var(--accent-yellow);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background: transparent;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary-red);
+            color: var(--primary-red);
+            transform: scale(1.1);
+        }
+
+        /* Charts Container */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            min-height: 350px;
+        }
+
+        .chart-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        /* Search & Filter */
+        .search-filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+
+        .filter-select {
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-red);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--primary-red);
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Membership Plan Cards */
+        .plan-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .plan-card {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .plan-card input[type="radio"] {
+            display: none;
+        }
+
+        .plan-card input[type="radio"]:checked + .plan-content {
+            border-color: var(--primary-red);
+            background: rgba(255, 8, 68, 0.1);
+            box-shadow: 0 0 20px rgba(255, 8, 68, 0.3);
+        }
+
+        .plan-content {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .plan-card:hover .plan-content {
+            border-color: var(--secondary-red);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .plan-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .plan-price {
+            color: var(--primary-red);
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .plan-duration {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card {
+            animation: fadeInUp 0.5s ease backwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-red);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h1>GYMFIT</h1>
+            <p>ADMIN PANEL</p>
+        </div>
+        <nav class="nav-menu">
+            <div class="nav-item active" onclick="showSection('dashboard')">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" onclick="showSection('members')">
+                <span class="nav-icon">👥</span>
+                <span>Manage Members</span>
+            </div>
+            <div class="nav-item" onclick="showSection('trainers')">
+                <span class="nav-icon">💪</span>
+                <span>Manage Trainers</span>
+            </div>
+            <div class="nav-item" onclick="showSection('plans')">
+                <span class="nav-icon">📋</span>
+                <span>Membership Plans</span>
+            </div>
+            <div class="nav-item" onclick="showSection('payments')">
+                <span class="nav-icon">💳</span>
+                <span>Payments</span>
+            </div>
+            <div class="nav-item" onclick="showSection('attendance')">
+                <span class="nav-icon">📅</span>
+                <span>Attendance</span>
+            </div>
+            <div class="nav-item" onclick="showSection('equipment')">
+                <span class="nav-icon">🏋️</span>
+                <span>Equipment</span>
+            </div>
+            <div class="nav-item" onclick="showSection('reports')">
+                <span class="nav-icon">📈</span>
+                <span>Reports</span>
+            </div>
+            <div class="nav-item" onclick="showSection('settings')">
+                <span class="nav-icon">⚙️</span>
+                <span>Settings</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h2>Admin Dashboard</h2>
+            <div class="user-info">
+                <div class="notification-btn">
+                    <span>🔔</span>
+                    <span class="notification-badge">5</span>
+                </div>
+                <div class="user-profile">
+                    <div class="user-avatar">JA</div>
+                    <div class="user-details">
+                        <h4>John Administrator</h4>
+                        <p>Super Admin</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <p class="stat-title">Total Members</p>
+                            <h3 class="stat-value">347</h3>
+                            <span class="stat-change positive">
+                                ↑ 12% <span style="color: var(--text-secondary)">this month</span>
+                            </span>
+                        </div>
+                        <div class="stat-icon red">👥</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <p class="stat-title">Active Plans</p>
+                            <h3 class="stat-value">298</h3>
+                            <span class="stat-change positive">
+                                ↑ 8% <span style="color: var(--text-secondary)">this month</span>
+                            </span>
+                        </div>
+                        <div class="stat-icon yellow">📋</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <p class="stat-title">Monthly Revenue</p>
+                            <h3 class="stat-value">₹8.5L</h3>
+                            <span class="stat-change positive">
+                                ↑ 15% <span style="color: var(--text-secondary)">vs last month</span>
+                            </span>
+                        </div>
+                        <div class="stat-icon green">💰</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <p class="stat-title">Today's Attendance</p>
+                            <h3 class="stat-value">142</h3>
+                            <span class="stat-change negative">
+                                ↓ 5% <span style="color: var(--text-secondary)">vs yesterday</span>
+                            </span>
+                        </div>
+                        <div class="stat-icon red">📅</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Members -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h3 class="section-title">Recent Members</h3>
+                    <button class="btn btn-primary" onclick="openModal('add-member')">+ Add Member</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Member ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Plan</th>
+                            <th>Expiry Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="members-table-body">
+                        <!-- Members will be loaded here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h4 class="chart-title">Monthly Revenue Trend</h4>
+                    <div style="height: 250px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                        📊 Chart visualization would be integrated here using Chart.js
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4 class="chart-title">Membership Distribution</h4>
+                    <div style="height: 250px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                        🥧 Pie chart would be integrated here using Chart.js
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Members Section -->
+        <div id="members-section" style="display: none;">
+            <div class="content-section">
+                <div class="section-header">
+                    <h3 class="section-title">All Members</h3>
+                    <button class="btn btn-primary" onclick="openModal('add-member')">+ Add New Member</button>
+                </div>
+
+                <div class="search-filter-bar">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="Search members by name, email, or ID..." onkeyup="filterMembers()">
+                    </div>
+                    <select class="filter-select" id="status-filter" onchange="filterMembers()">
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Expiring Soon">Expiring Soon</option>
+                    </select>
+                    <select class="filter-select" id="plan-filter" onchange="filterMembers()">
+                        <option value="">All Plans</option>
+                        <option value="Basic Monthly">Basic Monthly</option>
+                        <option value="Standard Quarterly">Standard Quarterly</option>
+                        <option value="Premium Half-Yearly">Premium Half-Yearly</option>
+                        <option value="Elite Annual">Elite Annual</option>
+                    </select>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Member ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Plan</th>
+                            <th>Expiry Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="members-table-body">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 2rem; color: #999;">Loading members...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Other sections would follow similar structure -->
+    </div>
+
+    <!-- Add Member Modal -->
+    <div id="add-member-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Member</h3>
+                <button class="close-btn" onclick="closeModal('add-member')">&times;</button>
+            </div>
+            <form id="add-member-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="fullName" placeholder="Enter member's full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="member@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phone" placeholder="10-digit mobile number" required>
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" id="dob" required>
+                </div>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <div class="gender-options">
+                        <label class="gender-card">
+                            <input type="radio" name="gender" value="male" required>
+                            <div class="gender-content">
+                                <span class="gender-icon">👨</span>
+                                <span class="gender-name">Male</span>
+                            </div>
+                        </label>
+                        <label class="gender-card">
+                            <input type="radio" name="gender" value="female" required>
+                            <div class="gender-content">
+                                <span class="gender-icon">👩</span>
+                                <span class="gender-name">Female</span>
+                            </div>
+                        </label>
+                        <label class="gender-card">
+                            <input type="radio" name="gender" value="other" required>
+                            <div class="gender-content">
+                                <span class="gender-icon">👤</span>
+                                <span class="gender-name">Other</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Membership Plan</label>
+                    <div class="plan-options">
+                        <label class="plan-card">
+                            <input type="radio" name="plan" id="plan" value="Basic Monthly" required>
+                            <div class="plan-content">
+                                <span class="plan-name">Basic Monthly</span>
+                                <span class="plan-price">₹999</span>
+                                <span class="plan-duration">30 days</span>
+                            </div>
+                        </label>
+                        <label class="plan-card">
+                            <input type="radio" name="plan" id="plan" value="Standard Quarterly" required>
+                            <div class="plan-content">
+                                <span class="plan-name">Standard Quarterly</span>
+                                <span class="plan-price">₹2,499</span>
+                                <span class="plan-duration">90 days</span>
+                            </div>
+                        </label>
+                        <label class="plan-card">
+                            <input type="radio" name="plan" id="plan" value="Premium Half-Yearly" required>
+                            <div class="plan-content">
+                                <span class="plan-name">Premium Half-Yearly</span>
+                                <span class="plan-price">₹4,499</span>
+                                <span class="plan-duration">180 days</span>
+                            </div>
+                        </label>
+                        <label class="plan-card">
+                            <input type="radio" name="plan" id="plan" value="Elite Annual" required>
+                            <div class="plan-content">
+                                <span class="plan-name">Elite Annual</span>
+                                <span class="plan-price">₹7,999</span>
+                                <span class="plan-duration">365 days</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Assign Trainer</label>
+                    <div class="trainer-options">
+                        <label class="trainer-card">
+                            <input type="radio" name="trainer" value="">
+                            <div class="trainer-content">
+                                <span class="trainer-name">No Trainer</span>
+                                <span class="trainer-specialty">Self Training</span>
+                            </div>
+                        </label>
+                        <label class="trainer-card">
+                            <input type="radio" name="trainer" value="Rajesh Kumar - Strength Training">
+                            <div class="trainer-content">
+                                <span class="trainer-name">Rajesh Kumar</span>
+                                <span class="trainer-specialty">Strength Training</span>
+                            </div>
+                        </label>
+                        <label class="trainer-card">
+                            <input type="radio" name="trainer" value="Priya Sharma - Yoga & Flexibility">
+                            <div class="trainer-content">
+                                <span class="trainer-name">Priya Sharma</span>
+                                <span class="trainer-specialty">Yoga & Flexibility</span>
+                            </div>
+                        </label>
+                        <label class="trainer-card">
+                            <input type="radio" name="trainer" value="Vikram Singh - Weight Loss">
+                            <div class="trainer-content">
+                                <span class="trainer-name">Vikram Singh</span>
+                                <span class="trainer-specialty">Weight Loss</span>
+                            </div>
+                        </label>
+                        <label class="trainer-card">
+                            <input type="radio" name="trainer" value="Anjali Reddy - Cardio & Endurance">
+                            <div class="trainer-content">
+                                <span class="trainer-name">Anjali Reddy</span>
+                                <span class="trainer-specialty">Cardio & Endurance</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact</label>
+                    <input type="text" id="emergencyContact" placeholder="Emergency contact name">
+                </div>
+                <div class="form-group">
+                    <label>Emergency Phone</label>
+                    <input type="tel" id="emergencyPhone" placeholder="Emergency contact number">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Add Member</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('add-member')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ===== FIREBASE CONFIGURATION =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxxx",
+            authDomain: "gym-management-5a7b8.firebaseapp.com",
+            databaseURL: "https://gym-management-5a7b8-default-rtdb.firebaseio.com",
+            projectId: "gym-management-5a7b8",
+            storageBucket: "gym-management-5a7b8.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef1234567890"
+        };
+
+        // Initialize Firebase
+        let db = null;
+        let firebaseAvailable = false;
+        
+        try {
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                firebaseAvailable = true;
+                console.log('Firebase initialized successfully');
+            } else {
+                throw new Error('Firebase SDK not loaded');
+            }
+        } catch (error) {
+            firebaseAvailable = false;
+            console.log('Note: Using localStorage as fallback. To use Firebase:');
+            console.log('1. Create a Firebase project at https://firebase.google.com');
+            console.log('2. Update the firebaseConfig with your credentials');
+            console.log('Error details:', error.message);
+        }
+
+        // ===== MEMBER MANAGEMENT WITH FIREBASE/LOCALSTORAGE =====
+        
+        // Plan durations in days
+        const PLAN_DURATIONS = {
+            'Basic Monthly': 30,
+            'Standard Quarterly': 90,
+            'Premium Half-Yearly': 180,
+            'Elite Annual': 365
+        };
+
+        // Get the next member ID
+        function getNextMemberId() {
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            if (members.length === 0) return 1;
+            const maxId = Math.max(...members.map(m => parseInt(m.id.replace('#GYM', ''))));
+            return maxId + 1;
+        }
+
+        // Add new member to Firebase/LocalStorage
+        function addMember(memberData) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const memberId = getNextMemberId();
+                    const memberIdString = `#GYM${String(memberId).padStart(3, '0')}`;
+                    
+                    // Calculate expiry date based on plan
+                    const today = new Date();
+                    const durationDays = PLAN_DURATIONS[memberData.plan] || 30;
+                    const expiryDate = new Date(today.getTime() + durationDays * 24 * 60 * 60 * 1000);
+                    
+                    const newMember = {
+                        id: memberIdString,
+                        fullName: memberData.fullName,
+                        email: memberData.email,
+                        phone: memberData.phone,
+                        dob: memberData.dob,
+                        gender: memberData.gender,
+                        plan: memberData.plan,
+                        trainer: memberData.trainer || 'No Trainer',
+                        emergencyContact: memberData.emergencyContact,
+                        emergencyPhone: memberData.emergencyPhone,
+                        joinDate: today.toISOString().split('T')[0],
+                        expiryDate: expiryDate.toISOString().split('T')[0],
+                        status: 'Active',
+                        timestamp: Date.now()
+                    };
+                    
+                    if (firebaseAvailable && db) {
+                        // Save to Firebase
+                        db.ref('members/' + memberIdString).set(newMember, (error) => {
+                            if (error) {
+                                console.log('Firebase error, saving to localStorage:', error);
+                                saveMemberLocal(newMember);
+                                resolve(newMember);
+                            } else {
+                                console.log('Member saved to Firebase:', memberIdString);
+                                resolve(newMember);
+                            }
+                        });
+                    } else {
+                        // Save to localStorage directly
+                        saveMemberLocal(newMember);
+                        resolve(newMember);
+                    }
+                } catch (error) {
+                    console.error('Error in addMember:', error);
+                    reject(error);
+                }
+            });
+        }
+
+        function saveMemberLocal(member) {
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            members.push(member);
+            localStorage.setItem('members', JSON.stringify(members));
+        }
+
+        // Get all members from Firebase/LocalStorage
+        function getAllMembers() {
+            return new Promise((resolve) => {
+                try {
+                    // First, load from localStorage immediately
+                    const localMembers = JSON.parse(localStorage.getItem('members')) || [];
+                    resolve(localMembers);
+                    
+                    // Then try to sync with Firebase in background (don't wait)
+                    if (firebaseAvailable && db) {
+                        db.ref('members').once('value', (snapshot) => {
+                            const data = snapshot.val();
+                            if (data) {
+                                const members = Object.values(data);
+                                localStorage.setItem('members', JSON.stringify(members));
+                                // Reload UI with Firebase data
+                                loadMembers();
+                            }
+                        }, (error) => {
+                            console.log('Firebase sync error, using localStorage');
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error in getAllMembers:', error);
+                    resolve(JSON.parse(localStorage.getItem('members')) || []);
+                }
+            });
+        }
+
+        // Delete member from Firebase/LocalStorage
+        function deleteMember(memberId) {
+            if (!confirm('Are you sure you want to delete this member?')) return;
+            
+            try {
+                if (firebaseAvailable && db) {
+                    db.ref('members/' + memberId).remove((error) => {
+                        if (error) {
+                            console.log('Firebase error, deleting from localStorage:', error);
+                            deleteMemberLocal(memberId);
+                        } else {
+                            console.log('Member deleted from Firebase:', memberId);
+                        }
+                        loadMembers();
+                        showNotification('Member deleted successfully!', 'success');
+                    });
+                } else {
+                    deleteMemberLocal(memberId);
+                    loadMembers();
+                    showNotification('Member deleted successfully!', 'success');
+                }
+            } catch (error) {
+                console.error('Error in deleteMember:', error);
+                deleteMemberLocal(memberId);
+                loadMembers();
+                showNotification('Member deleted!', 'success');
+            }
+        }
+
+        function deleteMemberLocal(memberId) {
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            const filteredMembers = members.filter(m => m.id !== memberId);
+            localStorage.setItem('members', JSON.stringify(filteredMembers));
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        // Check if membership is expiring soon (within 7 days)
+        function isExpiringsooon(expiryDate) {
+            const today = new Date();
+            const expiry = new Date(expiryDate);
+            const daysLeft = (expiry - today) / (1000 * 60 * 60 * 24);
+            return daysLeft <= 7 && daysLeft > 0;
+        }
+
+        // Load and display members
+        function loadMembers() {
+            getAllMembers().then(members => {
+                displayMembersTable(members);
+            });
+        }
+
+        // Filter members based on search and filters
+        function filterMembers() {
+            const searchTerm = document.getElementById('search-input')?.value?.toLowerCase() || '';
+            const statusFilter = document.getElementById('status-filter')?.value || '';
+            const planFilter = document.getElementById('plan-filter')?.value || '';
+            
+            getAllMembers().then(members => {
+                let filtered = members.filter(member => {
+                    const matchesSearch = searchTerm === '' || 
+                        member.fullName.toLowerCase().includes(searchTerm) ||
+                        member.email.toLowerCase().includes(searchTerm) ||
+                        member.id.toLowerCase().includes(searchTerm);
+                    
+                    const status = isExpiringsooon(member.expiryDate) ? 'Expiring Soon' : 'Active';
+                    const matchesStatus = statusFilter === '' || status === statusFilter;
+                    
+                    const matchesPlan = planFilter === '' || member.plan === planFilter;
+                    
+                    return matchesSearch && matchesStatus && matchesPlan;
+                });
+                
+                displayMembersTable(filtered);
+            });
+        }
+
+        // Display members in table
+        function displayMembersTable(members) {
+            const tbody = document.getElementById('members-table-body');
+            
+            if (!tbody) return;
+            
+            if (members.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #999;">No members found.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = members.map(member => {
+                const status = isExpiringsooon(member.expiryDate) ? 'Expiring Soon' : 'Active';
+                const statusClass = status === 'Expiring Soon' ? 'pending' : 'active';
+                
+                return `
+                    <tr>
+                        <td>${member.id}</td>
+                        <td>${member.fullName}</td>
+                        <td>${member.email}</td>
+                        <td>${member.plan}</td>
+                        <td>${formatDate(member.expiryDate)}</td>
+                        <td><span class="status-badge ${statusClass}">${status}</span></td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="action-btn" title="Edit" onclick="editMember('${member.id}')">✏️</button>
+                                <button class="action-btn" title="View" onclick="viewMember('${member.id}')">👁️</button>
+                                <button class="action-btn" title="Delete" onclick="deleteMember('${member.id}')">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // View member details
+        function viewMember(memberId) {
+            getAllMembers().then(members => {
+                const member = members.find(m => m.id === memberId);
+                if (member) {
+                    alert(`Member: ${member.fullName}\nEmail: ${member.email}\nPhone: ${member.phone}\nPlan: ${member.plan}\nExpiry: ${formatDate(member.expiryDate)}`);
+                }
+            });
+        }
+
+        // Edit member
+        function editMember(memberId) {
+            alert('Edit functionality coming soon!');
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? '#00FF88' : type === 'error' ? '#FF0844' : '#FFB800';
+            const textColor = type === 'success' ? '#000' : '#fff';
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${bgColor};
+                color: ${textColor};
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                z-index: 1000;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Navigation
+        function showSection(section) {
+            // Hide all sections
+            const sections = ['dashboard', 'members', 'trainers', 'plans', 'payments', 'attendance', 'equipment', 'reports', 'settings'];
+            sections.forEach(s => {
+                const el = document.getElementById(s + '-section');
+                if (el) el.style.display = 'none';
+            });
+
+            // Show selected section
+            const selectedSection = document.getElementById(section + '-section');
+            if (selectedSection) {
+                selectedSection.style.display = 'block';
+            }
+
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId + '-modal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId + '-modal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        // Close modal on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // Add sample members for demonstration
+        function addSampleMembers() {
+            let existingMembers = JSON.parse(localStorage.getItem('members')) || [];
+            
+            // Always ensure we have sample data (check if really empty or just corrupted)
+            if (existingMembers.length === 0 || !existingMembers[0]?.fullName) {
+                const today = new Date();
+                const sampleMembers = [
+                    {
+                        id: '#GYM001',
+                        fullName: 'Rahul Mehta',
+                        email: 'rahul.m@email.com',
+                        phone: '9876543210',
+                        dob: '1990-05-15',
+                        gender: 'male',
+                        plan: 'Premium Half-Yearly',
+                        trainer: 'Rajesh Kumar - Strength Training',
+                        emergencyContact: 'Priya Mehta',
+                        emergencyPhone: '9876543211',
+                        joinDate: '2025-08-04',
+                        expiryDate: '2026-02-04',
+                        status: 'Active',
+                        timestamp: Date.now()
+                    },
+                    {
+                        id: '#GYM002',
+                        fullName: 'Sneha Patil',
+                        email: 'sneha.p@email.com',
+                        phone: '9876543212',
+                        dob: '1992-03-22',
+                        gender: 'female',
+                        plan: 'Standard Quarterly',
+                        trainer: 'Priya Sharma - Yoga & Flexibility',
+                        emergencyContact: 'Vijay Patil',
+                        emergencyPhone: '9876543213',
+                        joinDate: '2025-11-04',
+                        expiryDate: '2026-02-02',
+                        status: 'Active',
+                        timestamp: Date.now()
+                    },
+                    {
+                        id: '#GYM003',
+                        fullName: 'Amit Shah',
+                        email: 'amit.s@email.com',
+                        phone: '9876543214',
+                        dob: '1988-07-10',
+                        gender: 'male',
+                        plan: 'Elite Annual',
+                        trainer: 'Vikram Singh - Weight Loss',
+                        emergencyContact: 'Sunita Shah',
+                        emergencyPhone: '9876543215',
+                        joinDate: '2025-06-04',
+                        expiryDate: '2026-06-04',
+                        status: 'Active',
+                        timestamp: Date.now()
+                    },
+                    {
+                        id: '#GYM004',
+                        fullName: 'Kavya Nair',
+                        email: 'kavya.n@email.com',
+                        phone: '9876543216',
+                        dob: '1995-12-18',
+                        gender: 'female',
+                        plan: 'Basic Monthly',
+                        trainer: 'Anjali Reddy - Cardio & Endurance',
+                        emergencyContact: 'Arun Nair',
+                        emergencyPhone: '9876543217',
+                        joinDate: '2026-01-04',
+                        expiryDate: '2026-02-04',
+                        status: 'Active',
+                        timestamp: Date.now()
+                    },
+                    {
+                        id: '#GYM005',
+                        fullName: 'Arjun Kumar',
+                        email: 'arjun.k@email.com',
+                        phone: '9876543218',
+                        dob: '1991-09-05',
+                        gender: 'male',
+                        plan: 'Premium Half-Yearly',
+                        trainer: 'Rajesh Kumar - Strength Training',
+                        emergencyContact: 'Maya Kumar',
+                        emergencyPhone: '9876543219',
+                        joinDate: '2025-08-04',
+                        expiryDate: '2026-02-04',
+                        status: 'Active',
+                        timestamp: Date.now()
+                    },
+                    {
+                        id: '#GYM006',
+                        fullName: 'Pooja Singh',
+                        email: 'pooja.s@email.com',
+                        phone: '9876543220',
+                        dob: '1993-11-30',
+                        gender: 'female',
+                        plan: 'Standard Quarterly',
+                        trainer: 'No Trainer',
+                        emergencyContact: 'Rohit Singh',
+                        emergencyPhone: '9876543221',
+                        joinDate: '2025-11-04',
+                        expiryDate: '2026-02-02',
+                        status: 'Active',
+                        timestamp: Date.now()
+                    },
+                    {
+                        id: '#GYM007',
+                        fullName: 'Vikram Desai',
+                        email: 'vikram.d@email.com',
+                        phone: '9876543222',
+                        dob: '1987-04-12',
+                        gender: 'male',
+                        plan: 'Elite Annual',
+                        trainer: 'Vikram Singh - Weight Loss',
+                        emergencyContact: 'Anjali Desai',
+                        emergencyPhone: '9876543223',
+                        joinDate: '2025-02-04',
+                        expiryDate: '2026-02-04',
+                        status: 'Active',
+                        timestamp: Date.now()
+                    },
+                    {
+                        id: '#GYM008',
+                        fullName: 'Neha Gupta',
+                        email: 'neha.g@email.com',
+                        phone: '9876543224',
+                        dob: '1994-06-08',
+                        gender: 'female',
+                        plan: 'Basic Monthly',
+                        trainer: 'Priya Sharma - Yoga & Flexibility',
+                        emergencyContact: 'Harsh Gupta',
+                        emergencyPhone: '9876543225',
+                        joinDate: '2026-01-04',
+                        expiryDate: '2026-02-04',
+                        status: 'Active',
+                        timestamp: Date.now()
+                    }
+                ];
+                
+                localStorage.setItem('members', JSON.stringify(sampleMembers));
+                console.log('Sample members added successfully!');
+            }
+        }
+
+        // Handle form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('add-member-form');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Get the selected values from radio buttons
+                    const selectedGender = document.querySelector('input[name="gender"]:checked');
+                    const selectedPlan = document.querySelector('input[name="plan"]:checked');
+                    const selectedTrainer = document.querySelector('input[name="trainer"]:checked');
+                    
+                    const memberData = {
+                        fullName: document.getElementById('fullName').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        dob: document.getElementById('dob').value,
+                        gender: selectedGender ? selectedGender.value : '',
+                        plan: selectedPlan ? selectedPlan.value : '',
+                        trainer: selectedTrainer ? selectedTrainer.value : 'No Trainer',
+                        emergencyContact: document.getElementById('emergencyContact').value,
+                        emergencyPhone: document.getElementById('emergencyPhone').value
+                    };
+                    
+                    if (!memberData.gender) {
+                        showNotification('Please select a gender', 'error');
+                        return;
+                    }
+                    
+                    if (!memberData.plan) {
+                        showNotification('Please select a membership plan', 'error');
+                        return;
+                    }
+                    
+                    await addMember(memberData);
+                    showNotification('Member added successfully!', 'success');
+                    form.reset();
+                    closeModal('add-member');
+                    loadMembers();
+                });
+            }
+            
+            // Load sample members on first load
+            addSampleMembers();
+            
+            // Load members on page load
+            loadMembers();
+        });
+    </script>
+</body>
+</html>
